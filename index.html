@@ -3,24 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Clsthenics Log</title>
+<title>Calisthenics Log</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg: #2B2822;
-    --bg-raised: #4A453C;
-    --bg-raised-2: #565045;
-    --text: #F0EBE0;
-    --text-dim: #B8AF9F;
-    --clay: #9C6B45;
-    --clay-bright: #C4835A;
-    --moss: #6E7B5C;
-    --moss-bright: #8A9A73;
-    --gold: #C9A86A;
-    --danger: #A85C4B;
-    --border: #5A5347;
+    /* Donker thema (standaard) — contrast opgehoogd t.o.v. eerdere versie */
+    --bg: #211F1A;
+    --bg-raised: #423D33;
+    --bg-raised-2: #4F4939;
+    --text: #FAF7F0;
+    --text-dim: #CFC6B4;
+    --clay: #B47D50;
+    --clay-bright: #D89665;
+    --moss: #7C8C68;
+    --moss-bright: #A0B586;
+    --gold: #E0BC7C;
+    --danger: #D17B65;
+    --border: #6B6350;
     --radius-sm: 6px;
     --radius-md: 10px;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #FAF7F0;
+      --bg-raised: #FFFFFF;
+      --bg-raised-2: #F1ECE0;
+      --text: #2A2620;
+      --text-dim: #5C5648;
+      --clay: #9C5F31;
+      --clay-bright: #B4703C;
+      --moss: #4E5F3D;
+      --moss-bright: #3F4E31;
+      --gold: #8A6423;
+      --danger: #A5402B;
+      --border: #D8D0BE;
+    }
   }
 
   * { box-sizing: border-box; }
@@ -183,7 +201,7 @@
 
   .day-card.noodtraining {
     border-color: var(--clay);
-    background: linear-gradient(160deg, var(--bg-raised), #3d3428);
+    background: linear-gradient(160deg, var(--bg-raised), var(--bg-raised-2));
   }
 
   /* ===== Buttons ===== */
@@ -210,6 +228,75 @@
   .btn.primary:hover { background: var(--clay-bright); }
 
   .btn.full { width: 100%; }
+
+  .btn.danger-outline {
+    background: transparent;
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+
+  .btn.danger-outline:hover { background: var(--danger); color: #FFF8EF; }
+
+  .btn.ghost {
+    background: transparent;
+    border-color: transparent;
+    color: var(--text-dim);
+  }
+
+  .btn.ghost:hover { color: var(--text); border-color: transparent; background: transparent; }
+
+  /* ===== Verlaat-bevestiging popup ===== */
+  .verlaat-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .verlaat-overlay.show { display: flex; }
+
+  .verlaat-modal {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    padding: 24px 20px calc(20px + env(safe-area-inset-bottom, 0px)) 20px;
+    max-width: 480px;
+    width: 100%;
+    animation: verlaatSlideUp 0.2s ease;
+  }
+
+  @keyframes verlaatSlideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .verlaat-titel {
+    font-family: 'SF Mono', monospace;
+    font-size: 17px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .verlaat-tekst {
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .verlaat-knoppen {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  @media (min-width: 480px) {
+    .verlaat-overlay { align-items: center; }
+    .verlaat-modal { border-radius: var(--radius-md); }
+  }
 
   /* ===== Training detail ===== */
   .block {
@@ -357,6 +444,108 @@
     text-align: center;
   }
 
+  /* ===== Set-rij met draaiwiel ===== */
+  .set-row-wiel {
+    display: grid;
+    grid-template-columns: 22px 1fr auto;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: start;
+  }
+
+  .set-row-wiel .set-num {
+    font-family: 'SF Mono', monospace;
+    font-size: 12px;
+    color: var(--gold);
+    text-align: center;
+    padding-top: 4px;
+  }
+
+  .set-wiel-kolom { min-width: 0; }
+  .set-row-wiel > div:last-child { min-width: 100px; padding-top: 16px; }
+
+  .draaiwiel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .draaiwiel-svg {
+    width: 100%;
+    max-width: 108px;
+    height: auto;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .draaiwiel-svg:active { cursor: grabbing; }
+
+  .draaiwiel-track {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 8;
+    stroke-linecap: round;
+  }
+
+  .draaiwiel-fill {
+    fill: none;
+    stroke: var(--clay-bright);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: d 0.05s linear;
+  }
+
+  .draaiwiel-knop {
+    fill: var(--gold);
+    stroke: var(--bg-raised);
+    stroke-width: 3;
+    r: 9;
+    transition: cx 0.05s linear, cy 0.05s linear;
+  }
+
+  .draaiwiel-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .draaiwiel-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .draaiwiel-btn:active { background: var(--bg-raised-2); }
+
+  .draaiwiel-waarde {
+    font-family: 'SF Mono', monospace;
+    font-size: 16px;
+    color: var(--text);
+    min-width: 48px;
+    text-align: center;
+  }
+
+  .draaiwiel-eenheid {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: 3px;
+  }
+
   select, input[type="number"] {
     width: 100%;
     background: var(--bg);
@@ -371,11 +560,17 @@
   }
 
   select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C9A86A' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E0BC7C' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 8px center;
     background-size: 16px;
     padding-right: 28px;
+  }
+
+  @media (prefers-color-scheme: light) {
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A6423' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    }
   }
 
   .field-label {
@@ -433,6 +628,62 @@
   .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
   /* ===== Timer ===== */
+  /* ===== Uitleg (begin/eind/let op) ===== */
+  .uitleg-box {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+  }
+
+  .uitleg-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .uitleg-toggle .tt-label {
+    font-family: 'SF Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .uitleg-chevron {
+    color: var(--text-dim);
+    font-size: 16px;
+    transition: transform 0.2s ease;
+    display: inline-block;
+  }
+
+  .uitleg-chevron.open { transform: rotate(180deg); }
+
+  .uitleg-content {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .uitleg-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+  }
+
+  .uitleg-label {
+    font-family: 'SF Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.02em;
+  }
+
   .timer-box {
     margin-top: 12px;
     padding-top: 12px;
@@ -571,32 +822,66 @@
   }
 
   /* ===== Progress / charts ===== */
-  .ex-picker {
+  .progress-tile-grid {
     display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    margin-top: 16px;
-    margin-bottom: 4px;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
   }
 
-  .ex-pill {
-    flex-shrink: 0;
+  .progress-tile {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    text-align: left;
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+  }
+
+  .progress-tile:hover { border-color: var(--moss-bright); background: var(--bg-raised-2); }
+  .progress-tile:active { transform: scale(0.98); }
+
+  .progress-tile .pt-naam {
+    font-size: 16px;
+    color: var(--text);
+    padding-right: 28px;
+  }
+
+  .progress-tile .pt-sub {
     font-family: 'SF Mono', monospace;
     font-size: 12px;
-    padding: 8px 14px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--bg-raised);
     color: var(--text-dim);
-    cursor: pointer;
-    white-space: nowrap;
+    margin-top: 4px;
   }
 
-  .ex-pill.active {
-    background: var(--moss);
-    border-color: var(--moss);
-    color: #F5F7F0;
+  .progress-tile .pt-arrow {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--moss-bright);
+    font-size: 18px;
+  }
+
+  .empty-progress {
+    text-align: center;
+    padding: 30px 10px;
+  }
+
+  .empty-progress-title {
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .empty-progress-sub {
+    font-size: 13px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    max-width: 320px;
+    margin: 0 auto;
   }
 
   .chart-card {
@@ -720,7 +1005,7 @@
 
 <header class="top">
   <div class="crumb" id="crumb"></div>
-  <h1 id="pageTitle">Jibbe's Clsthenics Log</h1>
+  <h1 id="pageTitle">Jibbe's Calisthenics Log</h1>
   <div class="sub" id="pageSub">Trainingsschema, logging en progressie</div>
 </header>
 
@@ -728,11 +1013,163 @@
 
 <div id="toast"></div>
 
+<div id="verlaatPopup" class="verlaat-overlay">
+  <div class="verlaat-modal">
+    <div class="verlaat-titel">Training verlaten?</div>
+    <div class="verlaat-tekst">Je hebt een training bezig. Wil je wat je al hebt ingevuld opslaan voordat je weggaat?</div>
+    <div class="verlaat-knoppen">
+      <button class="btn primary full" onclick="verlaatPopupOpslaanEnGa()">Opslaan en verlaten</button>
+      <button class="btn danger-outline full" onclick="verlaatPopupZonderOpslaan()">Verlaat zonder opslaan</button>
+      <button class="btn ghost full" onclick="sluitVerlaatPopup()">Annuleren, blijf op deze pagina</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ============================================================
-// SCHEMA DATA — Calisthenics 3 Programma (officiële versie)
-// Prioriteit: 1) upper-body hypertrofie 2) strength 3) skills 4) benen
+// UITLEG PER OEFENING — begin/eind-positie + aandachtspunten in simpele taal.
+// Gekoppeld op exacte oefeningnaam, zodat oefeningen die in meerdere dagen
+// voorkomen niet dubbel hoeven te worden geschreven.
 // ============================================================
+const OEFENING_UITLEG = {
+  // ---------- Skill: Planche ----------
+  "Planche lean": {
+    begin: "Sta in een push-up-houding met je handen iets breder dan schouderbreedte, vingers licht naar buiten gedraaid.",
+    eind: "Leun met gestrekte armen zo ver mogelijk naar voren, zodat je schouders duidelijk vóór je handen komen. Voeten blijven op de grond.",
+    let_op: "Houd je armen op slot en je bovenrug bol (protractie). Hoe verder je leunt, hoe zwaarder — bouw dit langzaam op."
+  },
+  "Advanced tuck planche": {
+    begin: "Vanuit de lean-houding til je je voeten van de grond, knieën richting borst getrokken (tuck).",
+    eind: "Zweef met gestrekte armen, heupen hoog en open, rug rond — je lichaam hangt horizontaal boven je handen.",
+    let_op: "Heupen moeten hoger zijn dan bij een gewone tuck planche. Zak niet door je schouders; houd ze actief omlaag en naar voren gedrukt."
+  },
+  "Tuck planche (schrappen bij tijdgebrek)": {
+    begin: "Zelfde als advanced tuck planche: handen op de grond, lichaam voorovergeleund.",
+    eind: "Knieën dicht tegen de borst, voeten los van de grond, gewicht volledig op je handen.",
+    let_op: "Dit is de basisversie — vorm gaat hier boven duur. Stop zodra je rug doorzakt."
+  },
+
+  // ---------- Skill: Front Lever ----------
+  "Advanced tuck front lever": {
+    begin: "Hang aan de bar met gestrekte armen.",
+    eind: "Trek je lichaam horizontaal onder de bar, knieën getuckt tegen de borst maar heupen verder open dan bij een gewone tuck — rug blijft rond.",
+    let_op: "Schouders actief naar beneden en naar achteren trekken (depressie + retractie). Armen blijven volledig gestrekt, nooit buigen om het makkelijker te maken."
+  },
+  "Tuck front lever raises": {
+    begin: "Hang aan de bar, benen getuckt.",
+    eind: "Trek je lichaam met een gecontroleerde beweging omhoog naar de horizontale tuck-positie en laat weer rustig zakken.",
+    let_op: "Geen swing of zwaai gebruiken — de beweging komt uit rug en core. Minstens 3 seconden voor het zakken (excentrisch)."
+  },
+  "Front lever rows (tuck/advanced tuck)": {
+    begin: "Hang horizontaal in je front-lever-positie (tuck of advanced tuck) onder de bar.",
+    eind: "Trek je borst richting de bar door je ellebogen te buigen, zoals een rij-beweging.",
+    let_op: "Houd de front-lever-houding vast tijdens de hele rij-beweging — laat je heupen niet zakken."
+  },
+
+  // ---------- Skill: Handstand ----------
+  "Chest-to-wall handstand": {
+    begin: "Ga met je handen op de grond staan, dicht bij de muur, en loop met je voeten omhoog tegen de muur tot je verticaal staat met je borst richting de muur.",
+    eind: "Volledig gestrekte handstand met je borst tegen (of vlak bij) de muur, lichaam kaarsrecht van handen tot voeten.",
+    let_op: "Duw actief door je schouders (volledige elevatie), ribben naar binnen, kijk naar je handen — niet naar voren."
+  },
+  "Kick-up practice (freestanding)": {
+    begin: "Sta in een uitvalspas met handen op de grond vóór je, één been achter voor de afzet.",
+    eind: "Kick met het achterste been rustig omhoog naar een verticale lijn, op zoek naar het balanspunt — zonder muursteun.",
+    let_op: "Een lichte kick is genoeg; probeer niet te hard te kicken. Corrigeer je balans met kleine vingerbewegingen, niet met je hele arm."
+  },
+  "Handstand shoulder shrugs aan muur": {
+    begin: "Volledige handstand tegen de muur, armen gestrekt.",
+    eind: "Zelfde houding, maar je schouders actief naar je oren omhoog drukken (eleveren) en weer laten zakken.",
+    let_op: "De rest van je lichaam blijft stil — alleen de schouderbeweging telt."
+  },
+
+  // ---------- Strength / Hypertrophy / Legs ----------
+  "Weighted dips": {
+    begin: "Hang met gestrekte armen boven de dip-bars, gewicht (rugzak) om.",
+    eind: "Zak met je ellebogen naar achteren tot een comfortabele diepte (ongeveer 90 graden) en duw weer omhoog.",
+    let_op: "Lichte voorover-leun beschermt je schouders. Niet te diep zakken als dat pijn geeft."
+  },
+  "Weighted push-ups, voeten verhoogd": {
+    begin: "Plank-positie met je voeten op een verhoging (bijv. bank of stoel), rugzak om, handen iets breder dan schouderbreedte.",
+    eind: "Zak tot je borst bijna de grond raakt en duw weer omhoog tot gestrekte armen.",
+    let_op: "Houd je lichaam in één rechte lijn — geen doorzakkende heupen."
+  },
+  "Pseudo planche push-ups": {
+    begin: "Plank-positie met je handen ter hoogte van je heupen (dus lager dan bij een gewone push-up) en vingers naar je voeten gericht.",
+    eind: "Zak met een sterke voorwaartse leun (schouders ver vóór je handen) en duw weer omhoog.",
+    let_op: "Hoe verder je leunt, hoe zwaarder het wordt op je schouders — bouw dit rustig op."
+  },
+  "Single-arm lateral raise": {
+    begin: "Sta rechtop, dumbbell in één hand naast je lichaam, lichte buiging in de elleboog.",
+    eind: "Til de dumbbell zijwaarts tot ongeveer schouderhoogte.",
+    let_op: "Til met je schouder, niet met een zwaai vanuit je rug. Kom langzaam terug omlaag."
+  },
+  "Band pull-aparts / face pulls": {
+    begin: "Houd de weerstandsband met beide handen voor je borst, armen gestrekt.",
+    eind: "Trek de band uit elkaar door je ellebogen naar achteren te bewegen, tot je handen naast je lichaam zijn.",
+    let_op: "Knijp je schouderbladen samen op het eindpunt. Beweging komt uit je rug, niet uit je armen."
+  },
+  "Weighted pull-ups": {
+    begin: "Hang met volledig gestrekte armen aan de bar, gewicht (rugzak) om, handen iets breder dan schouderbreedte.",
+    eind: "Trek jezelf op tot je kin boven de bar komt.",
+    let_op: "Volledige dead hang onderaan — niet halverwege stoppen. Geen swing gebruiken."
+  },
+  "Chin-ups": {
+    begin: "Hang met gestrekte armen aan de bar, handen dichter bij elkaar en handpalmen naar je toe gericht (supinatie).",
+    eind: "Trek jezelf op tot je kin boven de bar komt.",
+    let_op: "Zelfde principes als pull-ups: volledige hang onderaan, gecontroleerd zakken."
+  },
+  "Single-arm biceps curl": {
+    begin: "Sta rechtop, dumbbell in één hand, arm volledig gestrekt naast je lichaam.",
+    eind: "Buig je elleboog en breng de dumbbell omhoog richting je schouder.",
+    let_op: "Houd je elleboog stil naast je lichaam — geen zwaai met je schouder of rug."
+  },
+  "Single-leg RDL": {
+    begin: "Sta op één been, dumbbell in de tegenoverliggende hand, lichte buiging in de standbeen-knie.",
+    eind: "Buig voorover vanuit je heup, til je vrije been naar achteren voor balans, tot je rug ongeveer horizontaal is.",
+    let_op: "Houd je rug recht (niet bol) tijdens de hele beweging. Beweeg vanuit de heup, niet vanuit je onderrug."
+  },
+  "Bulgarian split squat": {
+    begin: "Sta rechtop, één voet op een verhoging achter je, dumbbell(s) vastgehouden.",
+    eind: "Zak recht naar beneden tot je voorste knie ongeveer 90 graden gebogen is.",
+    let_op: "Houd je bovenlichaam overwegend rechtop. Laat je voorknie niet naar binnen zakken."
+  },
+  "Single-leg calf raise op traptrede": {
+    begin: "Sta op één voet op de rand van een traptrede, hiel voorbij de rand, vasthouden aan een leuning voor balans.",
+    eind: "Kom zo hoog mogelijk op je tenen en laat je hiel daarna onder het treeniveau zakken voor extra rek.",
+    let_op: "Beweeg gecontroleerd, geen wippende beweging. Volledige ROM (range of motion) geeft het meeste effect."
+  },
+  "Deficit pike push-ups (voeten op stoel/bed, handen op boeken)": {
+    begin: "Pike-houding (omgekeerde V) met je voeten verhoogd op een stoel of bed, handen op een verhoging (boeken) voor extra diepte.",
+    eind: "Zak met je hoofd tussen je handen naar beneden, richting de grond onder je.",
+    let_op: "Houd je heupen hoog gedurende de hele beweging — dit is een opbouw richting de handstand push-up."
+  },
+  "Archer push-ups": {
+    begin: "Brede plank-positie, handen ver uit elkaar.",
+    eind: "Zak naar één kant, die arm buigt terwijl de andere arm gestrekt opzij blijft.",
+    let_op: "Het gewicht verschuift bewust naar de buigende kant — de gestrekte arm ondersteunt alleen."
+  },
+  "Inverted rows (of single-arm DB row, tempo 2-1-2)": {
+    begin: "Hang onder een lage bar of tafel met gestrekte armen, lichaam recht, hakken op de grond.",
+    eind: "Trek je borst omhoog richting de bar door je ellebogen te buigen.",
+    let_op: "Houd je lichaam in één rechte lijn, geen doorzakkende heupen. Bij de tempo-variant: 2 sec omhoog, 1 sec vasthouden, 2 sec naar beneden."
+  },
+  "Overhead triceps extension (optioneel)": {
+    begin: "Houd de dumbbell met beide handen achter je hoofd, ellebogen omhoog wijzend.",
+    eind: "Strek je armen volledig omhoog boven je hoofd.",
+    let_op: "Houd je ellebogen stil en dicht bij je hoofd — alleen de onderarm beweegt."
+  },
+  "Single-arm hammer curl (optioneel)": {
+    begin: "Sta rechtop, dumbbell in één hand met een neutrale handgreep (duim naar boven), arm gestrekt.",
+    eind: "Buig je elleboog en breng de dumbbell omhoog richting je schouder, handgreep blijft neutraal.",
+    let_op: "Elleboog blijft naast je lichaam — geen zwaaibeweging."
+  },
+  "Pistol-progressie (box pistol of band/deurpost-geassisteerd)": {
+    begin: "Sta op één been voor een lage box of met lichte ondersteuning (band of deurpost), ander been gestrekt naar voren.",
+    eind: "Zak gecontroleerd tot je zit op de box, of zo diep als je geassisteerd kunt, en kom weer omhoog.",
+    let_op: "Laat je knie niet naar binnen wegzakken. Verlaag de box pas als je de huidige hoogte volledig gecontroleerd beheerst."
+  }
+};
 
 const SCHEMA = {
   week: 1,
@@ -961,44 +1398,10 @@ const GEWICHT_OPTIES = (() => {
 })();
 
 // ============================================================
-// VOORBEELD-LOGDATA — simuleert een paar weken historie zodat
-// de progressie-grafieken iets te tonen hebben. Wordt vervangen
-// door echte Firestore-logs.
+// LOGHISTORIE — leeg totdat je echt gaat loggen (Firestore volgt later).
+// Elke oefening toont dan "Nog geen logs" op de progressie-pagina.
 // ============================================================
-function genereerVoorbeeldHistorie() {
-  const historie = {};
-  const vandaag = new Date("2026-09-15");
-
-  const reeksen = {
-    "Weighted dips": { startGewicht: 5, stapGewicht: 0.6, startReps: 6 },
-    "Weighted pull-ups": { startGewicht: 5, stapGewicht: 0.5, startReps: 5 },
-    "Weighted push-ups, voeten verhoogd": { startGewicht: 5, stapGewicht: 0.5, startReps: 9 },
-    "Chin-ups": { startGewicht: 0, stapGewicht: 0, startReps: 8 },
-    "Single-arm biceps curl": { startGewicht: 7, stapGewicht: 0.3, startReps: 9 },
-    "Single-leg RDL": { startGewicht: 8, stapGewicht: 0.2, startReps: 9 },
-    "Bulgarian split squat": { startGewicht: 7, stapGewicht: 0.3, startReps: 9 }
-  };
-
-  Object.entries(reeksen).forEach(([naam, cfg]) => {
-    const punten = [];
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(vandaag);
-      d.setDate(d.getDate() - i * 7);
-      const voortgang = 11 - i;
-      punten.push({
-        datum: d.toISOString().slice(0, 10),
-        gewicht: Math.round((cfg.startGewicht + voortgang * cfg.stapGewicht) * 100) / 100,
-        topReps: Math.min(15, cfg.startReps + Math.floor(voortgang / 3)),
-        gemRir: [3, 2, 2, 1][Math.floor(Math.random() * 4)]
-      });
-    }
-    historie[naam] = punten;
-  });
-
-  return historie;
-}
-
-const VOORBEELD_HISTORIE = genereerVoorbeeldHistorie();
+const VOORBEELD_HISTORIE = {};
 
 </script>
 <script>
@@ -1015,6 +1418,7 @@ const subEl = document.getElementById('pageSub');
 let ingelogd = false; // placeholder — wordt vervangen door echte Firebase Auth state
 let actieveChart = null;
 let huidigLogDag = null;
+let pendingVerlaatHash = null; // welke navigatie wacht op bevestiging via de verlaat-popup
 let huidigProgressieOefening = ALLE_OEFENINGEN[0];
 
 function toast(msg) {
@@ -1055,19 +1459,102 @@ function route() {
   if (parts[0] === 'trainen' && !parts[1]) return renderTrainenMenu();
   if (parts[0] === 'trainen' && parts[1]) return renderDagDetail(parts[1]);
   if (parts[0] === 'loggen' && parts[1]) return renderLoggen(parts[1]);
-  if (parts[0] === 'progressie') return renderProgressie();
+  if (parts[0] === 'progressie' && !parts[1]) return renderProgressieOverzicht();
+  if (parts[0] === 'progressie' && parts[1]) return renderProgressieDetail(decodeURIComponent(parts[1]));
   renderHome();
 }
 
-window.addEventListener('hashchange', route);
+let laatsteBevestigdeHash = window.location.hash;
 
-function go(hash) { window.location.hash = hash; }
+window.addEventListener('hashchange', () => {
+  const nieuweHash = window.location.hash;
+  // Browser-terug/vooruit verandert de hash al vóórdat we kunnen ingrijpen.
+  // Bij een actieve logsessie zetten we de hash terug en tonen we de popup;
+  // pas na bevestiging (opslaan of verwerpen) laten we de nieuwe hash staan.
+  if (huidigLogDag && verlaatVereistBevestiging(nieuweHash.slice(1))) {
+    history.pushState(null, '', laatsteBevestigdeHash);
+    toonVerlaatPopup(nieuweHash.slice(1));
+    return;
+  }
+  laatsteBevestigdeHash = nieuweHash;
+  route();
+});
+
+function go(hash) {
+  if (verlaatVereistBevestiging(hash)) {
+    toonVerlaatPopup(hash);
+    return;
+  }
+  laatsteBevestigdeHash = '#' + hash;
+  window.location.hash = hash;
+}
+
+// Bepaalt of het weggaan van de huidige route een actieve, onafgeronde
+// logsessie zou onderbreken. Binnen dezelfde logsessie blijven (bv. van
+// kaart naar kaart, dat loopt niet via go()) hoeft niet bevestigd te worden.
+function verlaatVereistBevestiging(doelHash) {
+  if (!huidigLogDag) return false;
+  // Naar dezelfde logging-flow gaan (zou hier normaliter niet gebeuren) telt niet als verlaten
+  if (doelHash === `loggen/${huidigLogDag.id}`) return false;
+  return true;
+}
+
+function toonVerlaatPopup(doelHash) {
+  pendingVerlaatHash = doelHash;
+  document.getElementById('verlaatPopup').classList.add('show');
+}
+
+function sluitVerlaatPopup() {
+  document.getElementById('verlaatPopup').classList.remove('show');
+  pendingVerlaatHash = null;
+}
+
+function verlaatPopupOpslaanEnGa() {
+  bewaarHuidigeKaart();
+  // Placeholder: hier schrijft straks de Firestore-koppeling logData daadwerkelijk weg.
+  // Tot die tijd bewaren we wat is ingevuld net als de normale 'Afronden'-knop dat doet.
+  Object.values(timerState).forEach(s => { if (s.intervalId) clearInterval(s.intervalId); });
+  toast('Voortgang opgeslagen ✓');
+  const doel = pendingVerlaatHash;
+  huidigLogDag = null;
+  logData = {};
+  logIndex = 0;
+  timerState = {};
+  uitlegOpen = {};
+  document.getElementById('verlaatPopup').classList.remove('show');
+  pendingVerlaatHash = null;
+  laatsteBevestigdeHash = '#' + doel;
+  window.location.hash = doel;
+}
+
+function verlaatPopupZonderOpslaan() {
+  Object.values(timerState).forEach(s => { if (s.intervalId) clearInterval(s.intervalId); });
+  const doel = pendingVerlaatHash;
+  huidigLogDag = null;
+  logData = {};
+  logIndex = 0;
+  timerState = {};
+  uitlegOpen = {};
+  document.getElementById('verlaatPopup').classList.remove('show');
+  pendingVerlaatHash = null;
+  laatsteBevestigdeHash = '#' + doel;
+  window.location.hash = doel;
+}
+
+// Browser terugknop / sluiten van het tabblad
+window.addEventListener('beforeunload', (e) => {
+  if (huidigLogDag) {
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  }
+});
 
 // ============================================================
 // HOME
 // ============================================================
 function renderHome() {
-  setHeader("Jibbe's Clsthenics Log", "Trainingsschema, logging en progressie", null);
+  setHeader("Jibbe's Calisthenics Log", "Trainingsschema, logging en progressie", null);
 
   app.innerHTML = `
     <div class="menu-grid">
@@ -1158,7 +1645,7 @@ function renderDagDetail(dagId) {
         <div class="block-head"><h2>${titel}</h2></div>
         ${lijst.map(o => `
           <div class="ex-row">
-            <div class="ex-name">${o.naam}${o.gewicht ? ` <span style="color:var(--gold)">· ${o.gewicht}kg</span>` : ''}</div>
+            <div class="ex-name">${o.naam}${(o.gewicht && ingelogd) ? ` <span style="color:var(--gold)">· ${o.gewicht}kg</span>` : ''}</div>
             <div class="ex-specs">
               <span><b>${o.target}</b></span>
               <span>rust ${o.rust}</span>
@@ -1204,6 +1691,7 @@ function renderDagDetail(dagId) {
 // TIMER — herbruikbare aftel-timer met ring-visualisatie
 // ============================================================
 let timerState = {}; // per kaart-index: { actief, resterend, totaal, intervalId, done }
+let uitlegOpen = {}; // per kaart-index: true/false — of het uitleg-blok is uitgeklapt
 
 function timerSeconden(item) {
   // Haalt seconden uit een target-string zoals "3×15 sec" of "40–45 sec"
@@ -1374,6 +1862,7 @@ function renderLoggen(dagId) {
     logIndex = 0;
     logData = {};
     timerState = {};
+    uitlegOpen = {};
   }
 
   renderLogKaart();
@@ -1436,6 +1925,126 @@ function renderWarmupCooldownKaart(item, idx) {
   `;
 }
 
+function renderUitlegBlock(naam, idx) {
+  const uitleg = OEFENING_UITLEG[naam];
+  if (!uitleg) return '';
+  const open = !!uitlegOpen[idx];
+
+  return `
+    <div class="uitleg-box">
+      <div class="uitleg-toggle" onclick="toggleUitleg(${idx})">
+        <span class="tt-label">📖 Meer uitleg${open ? ' verbergen' : ''}</span>
+        <span class="uitleg-chevron ${open ? 'open' : ''}">⌄</span>
+      </div>
+      ${open ? `
+        <div class="uitleg-content">
+          <div class="uitleg-row"><span class="uitleg-label">Begin</span><span>${uitleg.begin}</span></div>
+          <div class="uitleg-row"><span class="uitleg-label">Eind</span><span>${uitleg.eind}</span></div>
+          <div class="uitleg-row"><span class="uitleg-label">Let op</span><span>${uitleg.let_op}</span></div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function toggleUitleg(idx) {
+  uitlegOpen[idx] = !uitlegOpen[idx];
+  herteken();
+}
+
+// ============================================================
+// DRAAIWIEL — halve-cirkel dial control voor reps/seconden per set
+// ============================================================
+function renderDraaiwiel(id, waarde, max, eenheid) {
+  const veilig = Math.max(0, Math.min(max, parseInt(waarde) || 0));
+  const hoek = (veilig / max) * 180; // 0..180 graden over de halve cirkel
+  const r = 46;
+  const cx = 60, cy = 58;
+  const rad = (180 - hoek) * (Math.PI / 180);
+  const knopX = cx + r * Math.cos(rad);
+  const knopY = cy - r * Math.sin(rad);
+
+  return `
+    <div class="draaiwiel" id="wrap_${id}">
+      <svg width="120" height="72" viewBox="0 0 120 72" class="draaiwiel-svg" id="svg_${id}"
+        data-max="${max}" data-value="${veilig}" data-id="${id}">
+        <path d="M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}" class="draaiwiel-track"/>
+        <path d="M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${knopX} ${knopY}" class="draaiwiel-fill" id="fill_${id}"/>
+        <circle cx="${knopX}" cy="${knopY}" r="8" class="draaiwiel-knop" id="knop_${id}"/>
+      </svg>
+      <div class="draaiwiel-controls">
+        <button type="button" class="draaiwiel-btn" onclick="draaiwielStap('${id}', -1)">−</button>
+        <div class="draaiwiel-waarde"><span id="val_${id}">${veilig}</span><span class="draaiwiel-eenheid">${eenheid}</span></div>
+        <button type="button" class="draaiwiel-btn" onclick="draaiwielStap('${id}', 1)">+</button>
+      </div>
+      <input type="hidden" id="${id}" value="${veilig}">
+    </div>
+  `;
+}
+
+function draaiwielUpdateVisueel(id, waarde) {
+  const svg = document.getElementById(`svg_${id}`);
+  if (!svg) return;
+  const max = parseInt(svg.dataset.max);
+  const veilig = Math.max(0, Math.min(max, waarde));
+  const hoek = (veilig / max) * 180;
+  const r = 46, cx = 60, cy = 58;
+  const rad = (180 - hoek) * (Math.PI / 180);
+  const knopX = cx + r * Math.cos(rad);
+  const knopY = cy - r * Math.sin(rad);
+
+  document.getElementById(`fill_${id}`).setAttribute('d', `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${knopX} ${knopY}`);
+  document.getElementById(`knop_${id}`).setAttribute('cx', knopX);
+  document.getElementById(`knop_${id}`).setAttribute('cy', knopY);
+  document.getElementById(`val_${id}`).textContent = veilig;
+  document.getElementById(id).value = veilig;
+  svg.dataset.value = veilig;
+}
+
+function draaiwielStap(id, delta) {
+  const svg = document.getElementById(`svg_${id}`);
+  const huidig = parseInt(svg.dataset.value);
+  draaiwielUpdateVisueel(id, huidig + delta);
+}
+
+function draaiwielVanPositie(id, clientX, clientY) {
+  const svg = document.getElementById(`svg_${id}`);
+  const rect = svg.getBoundingClientRect();
+  const max = parseInt(svg.dataset.max);
+  // Coördinaten omrekenen naar het svg-viewbox-systeem (120x72), centrum op (60,58)
+  const schaalX = 120 / rect.width;
+  const schaalY = 72 / rect.height;
+  const x = (clientX - rect.left) * schaalX - 60;
+  const y = 58 - (clientY - rect.top) * schaalY;
+  let hoekRad = Math.atan2(Math.max(y, 0), x);
+  let hoekGraden = hoekRad * (180 / Math.PI);
+  if (hoekGraden < 0) hoekGraden = 0;
+  if (hoekGraden > 180) hoekGraden = 180;
+  const waarde = Math.round((hoekGraden / 180) * max);
+  draaiwielUpdateVisueel(id, waarde);
+}
+
+function draaiwielInit(id) {
+  const svg = document.getElementById(`svg_${id}`);
+  if (!svg) return;
+  let slepen = false;
+
+  const start = (e) => { slepen = true; beweeg(e); e.preventDefault(); };
+  const beweeg = (e) => {
+    if (!slepen) return;
+    const point = e.touches ? e.touches[0] : e;
+    draaiwielVanPositie(id, point.clientX, point.clientY);
+  };
+  const stop = () => { slepen = false; };
+
+  svg.addEventListener('mousedown', start);
+  svg.addEventListener('touchstart', start, { passive: false });
+  window.addEventListener('mousemove', beweeg);
+  window.addEventListener('touchmove', beweeg, { passive: false });
+  window.addEventListener('mouseup', stop);
+  window.addEventListener('touchend', stop);
+}
+
 function renderOefeningKaart(o, idx) {
   const isSkill = o.type === 'skill';
   const numSets = parseInt((o.target.match(/^(\d+)×/) || [null, 3])[1]);
@@ -1444,17 +2053,20 @@ function renderOefeningKaart(o, idx) {
   const timerKey = `ex_${idx}`;
 
   let setsHtml = '';
+  const repsWielIds = [];
   for (let s = 1; s <= numSets; s++) {
     const bewaardeReps = bewaard.sets && bewaard.sets[s] ? bewaard.sets[s].reps : '';
     const bewaardeGewicht = bewaard.sets && bewaard.sets[s] ? bewaard.sets[s].gewicht : (o.gewicht || 0);
+    const repsWielId = `reps_${s}`;
+    repsWielIds.push(repsWielId);
+    const repsMax = isSkill ? 120 : 30;
+    const repsStart = bewaardeReps !== '' ? bewaardeReps : 0;
     setsHtml += `
-      <div class="set-row">
+      <div class="set-row-wiel">
         <div class="set-num">${s}</div>
-        <div>
-          <label class="field-label">${isSkill ? 'Sec.' : 'Reps'}</label>
-          <select id="reps_${s}">
-            ${REPS_OPTIES.map(r => `<option value="${r}" ${String(r) === String(bewaardeReps) ? 'selected' : ''}>${r}</option>`).join('')}
-          </select>
+        <div class="set-wiel-kolom">
+          <label class="field-label">${isSkill ? 'Seconden' : 'Reps'}</label>
+          ${renderDraaiwiel(repsWielId, repsStart, repsMax, isSkill ? 'sec' : 'reps')}
         </div>
         ${!isSkill ? `
         <div>
@@ -1462,16 +2074,20 @@ function renderOefeningKaart(o, idx) {
           <select id="gewicht_${s}">
             ${GEWICHT_OPTIES.map(g => `<option value="${g}" ${g === bewaardeGewicht ? 'selected' : ''}>${g}kg</option>`).join('')}
           </select>
-        </div>` : `<div></div>`}
+        </div>` : ''}
       </div>
     `;
   }
+
+  // Draaiwielen initialiseren zodra de kaart in de DOM staat
+  setTimeout(() => repsWielIds.forEach(id => draaiwielInit(id)), 0);
 
   return `
     <div class="log-ex log-ex-single">
       <div class="ex-title">${o.naam}</div>
       <div class="ex-target">Target: ${o.target}</div>
       ${o.progressie ? `<div class="ex-progressie-log">↗ ${o.progressie}</div>` : ''}
+      ${renderUitlegBlock(o.naam, idx)}
       ${setsHtml}
       <div class="dual-select">
         <div>
@@ -1538,6 +2154,7 @@ function logAfronden() {
   logData = {};
   logIndex = 0;
   timerState = {};
+  uitlegOpen = {};
   setTimeout(() => go('trainen/' + dagId), 900);
 }
 
@@ -1564,32 +2181,59 @@ function doLogin() {
 // ============================================================
 // PROGRESSIE — oefening-picker + grafiek + statistieken
 // ============================================================
-function renderProgressie() {
-  setHeader("Progressie", "Per oefening je ontwikkeling in één oogopslag", [
+function renderProgressieOverzicht() {
+  setHeader("Progressie", "Tik een oefening voor de grafiek en details", [
     { label: 'Home', action: () => go('home') },
     { label: 'Progressie', action: () => {} }
   ]);
 
-  const pills = ALLE_OEFENINGEN.map(naam => `
-    <button class="ex-pill ${naam === huidigProgressieOefening ? 'active' : ''}" onclick="kiesProgressieOefening('${naam.replace(/'/g, "\\'")}')">${naam}</button>
-  `).join('');
+  const tegels = ALLE_OEFENINGEN.map(naam => {
+    const data = VOORBEELD_HISTORIE[naam];
+    const heeftData = data && data.length;
+    const laatste = heeftData ? data[data.length - 1] : null;
+    return `
+      <button class="progress-tile" onclick="go('progressie/${encodeURIComponent(naam)}')">
+        <div class="pt-naam">${naam}</div>
+        <div class="pt-sub">${heeftData ? `${laatste.gewicht}kg · laatste sessie` : 'Nog geen logs'}</div>
+        <span class="pt-arrow">→</span>
+      </button>
+    `;
+  }).join('');
+
+  app.innerHTML = `<div class="progress-tile-grid">${tegels}</div>`;
+}
+
+function renderProgressieDetail(oefeningNaam) {
+  setHeader(oefeningNaam, "Gewicht per sessie", [
+    { label: 'Home', action: () => go('home') },
+    { label: 'Progressie', action: () => go('progressie') },
+    { label: oefeningNaam, action: () => {} }
+  ]);
+
+  const data = VOORBEELD_HISTORIE[oefeningNaam];
+  const heeftData = data && data.length > 0;
+
+  if (!heeftData) {
+    app.innerHTML = `
+      <div class="chart-card">
+        <div class="empty-progress">
+          <div class="empty-progress-title">Nog geen logs</div>
+          <div class="empty-progress-sub">Zodra je deze oefening logt tijdens een training, verschijnt hier je progressie over tijd.</div>
+        </div>
+      </div>
+    `;
+    return;
+  }
 
   app.innerHTML = `
-    <div class="ex-picker">${pills}</div>
     <div class="chart-card">
-      <div class="chart-title" id="chartTitle">${huidigProgressieOefening}</div>
-      <div class="chart-sub">Gewicht per sessie · laatste 12 weken</div>
+      <div class="chart-sub">Laatste ${data.length} sessies</div>
       <div class="chart-canvas-wrap"><canvas id="progressChart"></canvas></div>
       <div class="stat-strip" id="statStrip"></div>
     </div>
   `;
 
-  tekenChart(huidigProgressieOefening);
-}
-
-function kiesProgressieOefening(naam) {
-  huidigProgressieOefening = naam;
-  renderProgressie();
+  tekenChart(oefeningNaam);
 }
 
 function tekenChart(oefeningNaam) {
