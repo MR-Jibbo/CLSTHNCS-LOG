@@ -464,46 +464,96 @@
   .set-wiel-kolom { min-width: 0; }
   .set-row-wiel > div:last-child { min-width: 100px; padding-top: 16px; }
 
-  .draaiwiel {
+  .lineaal-wrap {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 2px;
   }
 
-  .draaiwiel-svg {
+  .lineaal-venster {
+    position: relative;
     width: 100%;
-    max-width: 108px;
-    height: auto;
+    max-width: 220px;
+    height: 52px;
+    overflow: hidden;
     cursor: grab;
     touch-action: none;
     user-select: none;
   }
 
-  .draaiwiel-svg:active { cursor: grabbing; }
+  .lineaal-venster:active { cursor: grabbing; }
 
-  .draaiwiel-track {
-    fill: none;
-    stroke: var(--border);
-    stroke-width: 8;
-    stroke-linecap: round;
+  .lineaal-strook {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+    will-change: transform;
+    pointer-events: none;
   }
 
-  .draaiwiel-fill {
-    fill: none;
-    stroke: var(--clay-bright);
-    stroke-width: 8;
-    stroke-linecap: round;
-    transition: d 0.05s linear;
+  .lineaal-tik {
+    position: absolute;
+    bottom: 14px;
+    width: 1px;
+    height: 10px;
+    background: var(--border);
+    transform: translateX(-50%);
   }
 
-  .draaiwiel-knop {
-    fill: var(--gold);
-    stroke: var(--bg-raised);
-    stroke-width: 3;
-    r: 9;
-    transition: cx 0.05s linear, cy 0.05s linear;
+  .lineaal-tik.groot {
+    height: 18px;
+    width: 2px;
+    background: var(--text-dim);
   }
+
+  .lineaal-cijfer {
+    position: absolute;
+    bottom: 0;
+    font-family: 'SF Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    transform: translateX(-50%);
+  }
+
+  .lineaal-wijzer {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 2px;
+    height: 36px;
+    background: var(--gold);
+    transform: translateX(-50%);
+    z-index: 3;
+    border-radius: 2px;
+    pointer-events: none;
+  }
+
+  .lineaal-wijzer::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--gold);
+  }
+
+  .lineaal-fade {
+    position: absolute;
+    top: 0;
+    width: 36px;
+    height: 52px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .lineaal-fade-l { left: 0; background: linear-gradient(90deg, var(--bg-raised), transparent); }
+  .lineaal-fade-r { right: 0; background: linear-gradient(270deg, var(--bg-raised), transparent); }
 
   .draaiwiel-controls {
     display: flex;
@@ -629,28 +679,25 @@
 
   /* ===== Timer ===== */
   /* ===== Uitleg (begin/eind/let op) ===== */
-  .uitleg-box {
+  .uitleg-standalone {
     margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px dashed var(--border);
   }
 
-  .uitleg-toggle {
+  .uitleg-toggle-btn {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    cursor: pointer;
-    user-select: none;
+    font-family: 'SF Mono', monospace;
+    font-size: 13px;
   }
 
-  .uitleg-toggle .tt-label {
-    font-family: 'SF Mono', monospace;
-    font-size: 12px;
-    color: var(--text-dim);
+  .uitleg-toggle-btn.open {
+    border-color: var(--gold);
+    color: var(--gold);
   }
 
   .uitleg-chevron {
-    color: var(--text-dim);
+    color: inherit;
     font-size: 16px;
     transition: transform 0.2s ease;
     display: inline-block;
@@ -659,7 +706,7 @@
   .uitleg-chevron.open { transform: rotate(180deg); }
 
   .uitleg-content {
-    margin-top: 12px;
+    margin-top: 10px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -672,7 +719,8 @@
     font-size: 13px;
     color: var(--text);
     line-height: 1.6;
-    background: var(--bg);
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     padding: 10px 12px;
   }
@@ -1885,10 +1933,12 @@ function renderLogKaart() {
   `).join('');
 
   let kaartHtml = '';
+  let uitlegHtml = '';
   if (item.type === 'warmup' || item.type === 'cooldown') {
     kaartHtml = renderWarmupCooldownKaart(item, logIndex);
   } else {
     kaartHtml = renderOefeningKaart(item, logIndex);
+    uitlegHtml = renderUitlegBlock(item.naam, logIndex);
   }
 
   app.innerHTML = `
@@ -1900,6 +1950,7 @@ function renderLogKaart() {
         ? `<button class="btn primary nav-btn" onclick="logAfronden()">Afronden ✓</button>`
         : `<button class="btn primary nav-btn" onclick="logVolgende()">Volgende →</button>`}
     </div>
+    ${uitlegHtml}
   `;
 }
 
@@ -1931,11 +1982,11 @@ function renderUitlegBlock(naam, idx) {
   const open = !!uitlegOpen[idx];
 
   return `
-    <div class="uitleg-box">
-      <div class="uitleg-toggle" onclick="toggleUitleg(${idx})">
-        <span class="tt-label">📖 Meer uitleg${open ? ' verbergen' : ''}</span>
+    <div class="uitleg-standalone">
+      <button type="button" class="btn uitleg-toggle-btn full ${open ? 'open' : ''}" onclick="toggleUitleg(${idx})">
+        <span>📖 Meer uitleg${open ? ' verbergen' : ''}</span>
         <span class="uitleg-chevron ${open ? 'open' : ''}">⌄</span>
-      </div>
+      </button>
       ${open ? `
         <div class="uitleg-content">
           <div class="uitleg-row"><span class="uitleg-label">Begin</span><span>${uitleg.begin}</span></div>
@@ -1955,23 +2006,39 @@ function toggleUitleg(idx) {
 // ============================================================
 // DRAAIWIEL — halve-cirkel dial control voor reps/seconden per set
 // ============================================================
+// ============================================================
+// LINEAAL-CONTROL — horizontale schuifbare meetlat met vaste middenwijzer,
+// vervangt de eerdere halve-cirkel-draaiknop. Zelfde functienamen zodat
+// de rest van de code (renderOefeningKaart) ongewijzigd kan blijven.
+// ============================================================
+
+// Hoeveel px op het scherm één eenheid (1 sec of 1 rep) inneemt op de lineaal.
+const LINEAAL_PX_PER_EENHEID = 18;
+
 function renderDraaiwiel(id, waarde, max, eenheid) {
   const veilig = Math.max(0, Math.min(max, parseInt(waarde) || 0));
-  const hoek = (veilig / max) * 180; // 0..180 graden over de halve cirkel
-  const r = 46;
-  const cx = 60, cy = 58;
-  const rad = (180 - hoek) * (Math.PI / 180);
-  const knopX = cx + r * Math.cos(rad);
-  const knopY = cy - r * Math.sin(rad);
+
+  // Bouw de tik-strook: klein streepje per eenheid, groot streepje + cijfer per 5.
+  let tikjes = '';
+  for (let i = 0; i <= max; i++) {
+    const groot = i % 5 === 0;
+    const x = i * LINEAAL_PX_PER_EENHEID;
+    tikjes += `<div class="lineaal-tik ${groot ? 'groot' : ''}" style="left:${x}px"></div>`;
+    if (groot) {
+      tikjes += `<div class="lineaal-cijfer" style="left:${x}px">${i}</div>`;
+    }
+  }
 
   return `
-    <div class="draaiwiel" id="wrap_${id}">
-      <svg width="120" height="72" viewBox="0 0 120 72" class="draaiwiel-svg" id="svg_${id}"
-        data-max="${max}" data-value="${veilig}" data-id="${id}">
-        <path d="M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}" class="draaiwiel-track"/>
-        <path d="M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${knopX} ${knopY}" class="draaiwiel-fill" id="fill_${id}"/>
-        <circle cx="${knopX}" cy="${knopY}" r="8" class="draaiwiel-knop" id="knop_${id}"/>
-      </svg>
+    <div class="lineaal-wrap" id="wrap_${id}">
+      <div class="lineaal-wijzer"></div>
+      <div class="lineaal-venster" id="venster_${id}">
+        <div class="lineaal-strook" id="strook_${id}" data-max="${max}" data-value="${veilig}" data-id="${id}">
+          ${tikjes}
+        </div>
+      </div>
+      <div class="lineaal-fade lineaal-fade-l"></div>
+      <div class="lineaal-fade lineaal-fade-r"></div>
       <div class="draaiwiel-controls">
         <button type="button" class="draaiwiel-btn" onclick="draaiwielStap('${id}', -1)">−</button>
         <div class="draaiwiel-waarde"><span id="val_${id}">${veilig}</span><span class="draaiwiel-eenheid">${eenheid}</span></div>
@@ -1982,68 +2049,71 @@ function renderDraaiwiel(id, waarde, max, eenheid) {
   `;
 }
 
-function draaiwielUpdateVisueel(id, waarde) {
-  const svg = document.getElementById(`svg_${id}`);
-  if (!svg) return;
-  const max = parseInt(svg.dataset.max);
+function draaiwielUpdateVisueel(id, waarde, magTrillen) {
+  const strook = document.getElementById(`strook_${id}`);
+  if (!strook) return;
+  const max = parseInt(strook.dataset.max);
+  const vorige = parseInt(strook.dataset.value);
   const veilig = Math.max(0, Math.min(max, waarde));
-  const hoek = (veilig / max) * 180;
-  const r = 46, cx = 60, cy = 58;
-  const rad = (180 - hoek) * (Math.PI / 180);
-  const knopX = cx + r * Math.cos(rad);
-  const knopY = cy - r * Math.sin(rad);
 
-  document.getElementById(`fill_${id}`).setAttribute('d', `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${knopX} ${knopY}`);
-  document.getElementById(`knop_${id}`).setAttribute('cx', knopX);
-  document.getElementById(`knop_${id}`).setAttribute('cy', knopY);
+  // De strook verschuiven zodat de waarde precies onder de vaste middenwijzer valt.
+  const offsetPx = veilig * LINEAAL_PX_PER_EENHEID;
+  strook.style.transform = `translateX(-${offsetPx}px)`;
+
   document.getElementById(`val_${id}`).textContent = veilig;
   document.getElementById(id).value = veilig;
-  svg.dataset.value = veilig;
+  strook.dataset.value = veilig;
+
+  if (magTrillen !== false && veilig !== vorige && navigator.vibrate) {
+    navigator.vibrate(8);
+  }
 }
 
 function draaiwielStap(id, delta) {
-  const svg = document.getElementById(`svg_${id}`);
-  const huidig = parseInt(svg.dataset.value);
+  const strook = document.getElementById(`strook_${id}`);
+  const huidig = parseInt(strook.dataset.value);
   draaiwielUpdateVisueel(id, huidig + delta);
 }
 
-function draaiwielVanPositie(id, clientX, clientY) {
-  const svg = document.getElementById(`svg_${id}`);
-  const rect = svg.getBoundingClientRect();
-  const max = parseInt(svg.dataset.max);
-  // Coördinaten omrekenen naar het svg-viewbox-systeem (120x72), centrum op (60,58)
-  const schaalX = 120 / rect.width;
-  const schaalY = 72 / rect.height;
-  const x = (clientX - rect.left) * schaalX - 60;
-  const y = 58 - (clientY - rect.top) * schaalY;
-  let hoekRad = Math.atan2(Math.max(y, 0), x);
-  let hoekGraden = hoekRad * (180 / Math.PI);
-  if (hoekGraden < 0) hoekGraden = 0;
-  if (hoekGraden > 180) hoekGraden = 180;
-  const waarde = Math.round((hoekGraden / 180) * max);
-  draaiwielUpdateVisueel(id, waarde);
+function draaiwielVanPositie(id, clientX, startX, startWaarde) {
+  const strook = document.getElementById(`strook_${id}`);
+  const max = parseInt(strook.dataset.max);
+  const deltaPx = clientX - startX;
+  const deltaEenheden = Math.round(deltaPx / LINEAAL_PX_PER_EENHEID);
+  const nieuweWaarde = startWaarde - deltaEenheden; // naar rechts slepen = waarde omlaag (strook schuift mee naar rechts)
+  draaiwielUpdateVisueel(id, nieuweWaarde);
 }
 
 function draaiwielInit(id) {
-  const svg = document.getElementById(`svg_${id}`);
-  if (!svg) return;
+  const venster = document.getElementById(`venster_${id}`);
+  const strook = document.getElementById(`strook_${id}`);
+  if (!venster || !strook) return;
   let slepen = false;
+  let startX = 0;
+  let startWaarde = parseInt(strook.dataset.value);
 
-  const start = (e) => { slepen = true; beweeg(e); e.preventDefault(); };
+  const start = (e) => {
+    slepen = true;
+    const point = e.touches ? e.touches[0] : e;
+    startX = point.clientX;
+    startWaarde = parseInt(strook.dataset.value);
+    e.preventDefault();
+  };
   const beweeg = (e) => {
     if (!slepen) return;
     const point = e.touches ? e.touches[0] : e;
-    draaiwielVanPositie(id, point.clientX, point.clientY);
+    draaiwielVanPositie(id, point.clientX, startX, startWaarde);
   };
   const stop = () => { slepen = false; };
 
-  svg.addEventListener('mousedown', start);
-  svg.addEventListener('touchstart', start, { passive: false });
+  venster.addEventListener('mousedown', start);
+  venster.addEventListener('touchstart', start, { passive: false });
   window.addEventListener('mousemove', beweeg);
   window.addEventListener('touchmove', beweeg, { passive: false });
   window.addEventListener('mouseup', stop);
   window.addEventListener('touchend', stop);
 }
+
 
 function renderOefeningKaart(o, idx) {
   const isSkill = o.type === 'skill';
@@ -2079,15 +2149,19 @@ function renderOefeningKaart(o, idx) {
     `;
   }
 
-  // Draaiwielen initialiseren zodra de kaart in de DOM staat
-  setTimeout(() => repsWielIds.forEach(id => draaiwielInit(id)), 0);
+  // Draaiwielen initialiseren zodra de kaart in de DOM staat: events koppelen
+  // én de strook direct op de juiste startpositie zetten (geen trilling bij init).
+  setTimeout(() => repsWielIds.forEach(id => {
+    draaiwielInit(id);
+    const strook = document.getElementById(`strook_${id}`);
+    if (strook) draaiwielUpdateVisueel(id, parseInt(strook.dataset.value), false);
+  }), 0);
 
   return `
     <div class="log-ex log-ex-single">
       <div class="ex-title">${o.naam}</div>
       <div class="ex-target">Target: ${o.target}</div>
       ${o.progressie ? `<div class="ex-progressie-log">↗ ${o.progressie}</div>` : ''}
-      ${renderUitlegBlock(o.naam, idx)}
       ${setsHtml}
       <div class="dual-select">
         <div>
