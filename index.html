@@ -389,6 +389,89 @@
   }
 
   /* ===== Changelog ===== */
+  /* ===== Noodversie keuzescherm ===== */
+  .nood-keuze-blok {
+    margin-top: 24px;
+  }
+
+  .nood-keuze-titel {
+    font-family: 'SF Mono', monospace;
+    font-size: 13px;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  .nood-optie-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nood-optie-grid.compact-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .nood-optie {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .nood-optie:hover { border-color: var(--moss-bright); }
+
+  .nood-optie.gekozen {
+    border-color: var(--moss-bright);
+    background: var(--bg-raised-2);
+  }
+
+  .nood-optie.compact {
+    padding: 10px 16px;
+    flex: 1;
+    min-width: 90px;
+    text-align: center;
+  }
+
+  .nood-optie-dag {
+    font-family: 'SF Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-bottom: 3px;
+  }
+
+  .nood-optie-naam {
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  .nood-optie-target {
+    font-family: 'SF Mono', monospace;
+    font-size: 11px;
+    color: var(--moss-bright);
+    margin-top: 4px;
+  }
+
+  .nood-substap {
+    margin-top: 10px;
+    padding-left: 12px;
+    border-left: 2px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .nood-keuze-hint {
+    margin-top: 20px;
+    text-align: center;
+    font-family: 'SF Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
   .changelog {
     background: var(--bg-raised);
     border: 1px solid var(--border);
@@ -444,39 +527,78 @@
     text-align: center;
   }
 
-  /* ===== Set-rij met draaiwiel ===== */
-  .set-row-wiel {
-    display: grid;
-    grid-template-columns: 22px 1fr auto;
-    gap: 10px;
-    margin-bottom: 10px;
-    align-items: start;
+  /* ===== Set-blok: 1 kaart per set, met Reps- en Gewicht-paneel ===== */
+  .set-blok {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
   }
 
-  .set-row-wiel .set-num {
+  .set-blok:first-child { padding-top: 4px; }
+  .set-blok:last-child { border-bottom: none; padding-bottom: 4px; }
+
+  .set-blok-titel {
     font-family: 'SF Mono', monospace;
-    font-size: 12px;
-    color: var(--gold);
-    text-align: center;
-    padding-top: 4px;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 10px;
   }
 
-  .set-wiel-kolom { min-width: 0; }
-  .set-row-wiel > div:last-child { min-width: 100px; padding-top: 16px; }
+  .set-blok-rij {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .wiel-paneel {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+  }
+
+  /* Het Reps/Seconden-paneel is horizontaal en heeft veel meer breedte nodig
+     dan het smalle, verticale Gewicht-paneel om zijn schaal leesbaar te tonen. */
+  .wiel-paneel.reps-paneel { flex: 2.2; }
+  .wiel-paneel.gewicht-paneel { flex: 1; }
+
+  .wiel-paneel-titel {
+    font-family: 'SF Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
 
   .lineaal-wrap {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 8px;
+    width: 100%;
+    flex: 1;
+  }
+
+  /* Venster centreert verticaal in de beschikbare ruimte (tussen titel en waarde-badge),
+     de waarde-badge blijft daaronder aan de onderkant van het paneel staan. */
+  .lineaal-wrap .lineaal-venster {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
+  .lineaal-wrap .draaiwiel-waarde {
+    margin-top: auto;
   }
 
   .lineaal-venster {
     position: relative;
     width: 100%;
-    max-width: 220px;
-    height: 52px;
+    max-width: 200px;
+    height: 40px;
     overflow: hidden;
     cursor: grab;
     touch-action: none;
@@ -494,18 +616,22 @@
     pointer-events: none;
   }
 
+  .lineaal-strook.snappen {
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
   .lineaal-tik {
     position: absolute;
-    bottom: 14px;
+    bottom: 12px;
     width: 1px;
-    height: 10px;
+    height: 8px;
     background: var(--border);
     transform: translateX(-50%);
   }
 
   .lineaal-tik.groot {
-    height: 18px;
-    width: 2px;
+    height: 14px;
+    width: 1px;
     background: var(--text-dim);
   }
 
@@ -513,7 +639,7 @@
     position: absolute;
     bottom: 0;
     font-family: 'SF Mono', monospace;
-    font-size: 11px;
+    font-size: 9px;
     color: var(--text-dim);
     transform: translateX(-50%);
   }
@@ -523,7 +649,7 @@
     left: 50%;
     top: 0;
     width: 2px;
-    height: 36px;
+    height: 26px;
     background: var(--gold);
     transform: translateX(-50%);
     z-index: 3;
@@ -538,55 +664,97 @@
     left: 50%;
     transform: translateX(-50%);
     width: 0; height: 0;
-    border-left: 4px solid transparent;
-    border-right: 4px solid transparent;
-    border-top: 5px solid var(--gold);
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    border-top: 4px solid var(--gold);
   }
 
   .lineaal-fade {
     position: absolute;
     top: 0;
-    width: 36px;
-    height: 52px;
+    width: 26px;
+    height: 40px;
     z-index: 2;
     pointer-events: none;
   }
 
-  .lineaal-fade-l { left: 0; background: linear-gradient(90deg, var(--bg-raised), transparent); }
-  .lineaal-fade-r { right: 0; background: linear-gradient(270deg, var(--bg-raised), transparent); }
+  .lineaal-fade-l { left: 0; background: linear-gradient(90deg, var(--bg), transparent); }
+  .lineaal-fade-r { right: 0; background: linear-gradient(270deg, var(--bg), transparent); }
 
-  .draaiwiel-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 6px;
-    position: relative;
-    z-index: 2;
+  /* ===== Verticale variant (gewicht) — zelfde onderdelen, 90 graden gedraaid ===== */
+  .lineaal-wrap.verticaal .lineaal-venster {
+    width: 40px;
+    height: 130px;
+    max-width: none;
   }
 
-  .draaiwiel-btn {
+  .lineaal-wrap.verticaal .lineaal-strook {
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: auto;
+  }
+
+  .lineaal-wrap.verticaal .lineaal-tik {
+    bottom: auto;
+    right: 12px;
+    left: auto;
+    top: 0;
+    width: 8px;
+    height: 1px;
+    transform: translateY(-50%);
+  }
+
+  .lineaal-wrap.verticaal .lineaal-tik.groot {
+    width: 14px;
+    height: 1px;
+  }
+
+  .lineaal-wrap.verticaal .lineaal-cijfer {
+    bottom: auto;
+    right: -1px;
+    left: auto;
+    top: 0;
+    transform: translateY(-50%);
+  }
+
+  .lineaal-wrap.verticaal .lineaal-wijzer {
+    left: 0;
+    top: 50%;
     width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    font-size: 15px;
-    line-height: 1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
+    height: 2px;
+    border-radius: 0 1px 1px 0;
+    transform: translateY(-50%);
   }
 
-  .draaiwiel-btn:active { background: var(--bg-raised-2); }
+  .lineaal-wrap.verticaal .lineaal-wijzer::after {
+    top: 50%;
+    left: -4px;
+    transform: translateY(-50%);
+    border-left: none;
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+    border-right: 4px solid var(--gold);
+  }
+
+  .lineaal-wrap.verticaal .lineaal-fade {
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 26px;
+  }
+
+  .lineaal-wrap.verticaal .lineaal-fade-l { top: 0; left: 0; background: linear-gradient(180deg, var(--bg), transparent); }
+  .lineaal-wrap.verticaal .lineaal-fade-r { top: auto; bottom: 0; left: 0; background: linear-gradient(0deg, var(--bg), transparent); }
 
   .draaiwiel-waarde {
     font-family: 'SF Mono', monospace;
-    font-size: 16px;
+    font-size: 15px;
+    font-weight: 600;
     color: var(--text);
-    min-width: 48px;
+    background: var(--bg-raised-2);
+    padding: 2px 10px;
+    border-radius: 4px;
     text-align: center;
   }
 
@@ -869,6 +1037,24 @@
     color: var(--text-dim);
   }
 
+  .wc-set-timer {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+  }
+
+  .wc-set-timer:first-of-type {
+    margin-top: 12px;
+  }
+
+  .wc-set-label {
+    font-family: 'SF Mono', monospace;
+    font-size: 11px;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 4px;
+  }
+
   /* ===== Progress / charts ===== */
   .progress-tile-grid {
     display: flex;
@@ -932,6 +1118,35 @@
     margin: 0 auto;
   }
 
+  .progress-toggle-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .progress-toggle {
+    font-family: 'SF Mono', monospace;
+    font-size: 13px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-raised);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .progress-toggle.actief {
+    border-color: var(--moss-bright);
+    background: var(--moss);
+    color: #F5F7F0;
+  }
+
+  .progress-toggle:nth-of-type(2).actief {
+    border-color: var(--clay-bright);
+    background: var(--clay);
+  }
+
   .chart-card {
     background: var(--bg-raised);
     border: 1px solid var(--border);
@@ -950,6 +1165,40 @@
     font-size: 11px;
     color: var(--text-dim);
     margin-bottom: 14px;
+  }
+
+  .chart-sub-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .chart-sub-row .chart-sub { margin-bottom: 0; }
+
+  .periode-toggle-row {
+    display: flex;
+    gap: 4px;
+  }
+
+  .periode-toggle {
+    font-family: 'SF Mono', monospace;
+    font-size: 11px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .periode-toggle.actief {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: var(--bg-raised-2);
   }
 
   .chart-canvas-wrap { position: relative; height: 220px; }
@@ -1079,6 +1328,43 @@
 // Gekoppeld op exacte oefeningnaam, zodat oefeningen die in meerdere dagen
 // voorkomen niet dubbel hoeven te worden geschreven.
 // ============================================================
+// ============================================================
+// NOODVERSIE — keuzeopties voor skill/strength/hypertrophy.
+// Elke optie is een volledige kopie van de oefening zoals die in de
+// normale dag staat (sets/reps/gewicht/rust/progressie), zodat na het
+// kiezen automatisch alles correct wordt ingevuld.
+// ============================================================
+const NOODVERSIE_KEUZES = {
+  skill: [
+    { dag: "Dag A", naam: "Planche lean", target: "3×15–20 sec", rust: "60 sec", eenheid: "sec", focus: "Scapulae geprotracteerd, ellebogen gelockt, schouders vóór de handen", progressie: "Meer lean vóór langere hold" },
+    { dag: "Dag B", naam: "Advanced tuck front lever", target: "4×8–12 sec", rust: "90 sec", eenheid: "sec", focus: "Heupen open, rug rond, scapulae gedepresseerd + geretracteerd, armen kaarsrecht", progressie: "4×12 → 5×12 → single-leg testen" },
+    { dag: "Dag C", naam: "Chest-to-wall handstand", target: "4×20–40 sec", rust: "75 sec", eenheid: "sec", focus: "Ribben in, PPT, schouders volledig geëleveerd, kijk naar handen", progressie: "Holdduur → één been los → beide benen" }
+  ],
+  strength: [
+    { dag: "Dag A", naam: "Weighted dips", target: "4×5–8", rust: "150 sec", rir: "1–2", gewicht: 8, eenheid: "reps", trackable: true, progressie: "4×8 @8kg → +2kg → terug naar 5-6" },
+    { dag: "Dag B", naam: "Weighted pull-ups", target: "4×5–7", rust: "180 sec", rir: "1–2", gewicht: 8, eenheid: "reps", trackable: true, progressie: "4×7 @8kg → +2kg → terug naar 5" },
+    { dag: "Dag C", naam: "Deficit pike push-ups (voeten op stoel/bed, handen op boeken)", target: "4×6–10", rust: "120 sec", rir: "1–2", eenheid: "reps", trackable: true, progressie: "Reps → voeten hoger → grotere deficit → wall HSPU" }
+  ],
+  hypertrophy: {
+    "Dag A": [
+      { naam: "Pseudo planche push-ups", target: "3×6–10", rust: "90 sec", rir: "1–2", eenheid: "reps", trackable: true, progressie: "Meer lean → daarna rugzak 4kg" },
+      { naam: "Single-arm lateral raise", target: "3×12–15/arm", rust: "60 sec", rir: "0–1", gewicht: 5.5, eenheid: "reps", trackable: true, progressie: "Armen wisselen zonder rust ertussen" },
+      { naam: "Band pull-aparts / face pulls", target: "3×15–20", rust: "45 sec", rir: "1–2", eenheid: "reps", trackable: true, progressie: "Kortere greep = meer spanning" }
+    ],
+    "Dag B": [
+      { naam: "Chin-ups", target: "3×8–12", rust: "90 sec", rir: "1", eenheid: "reps", trackable: true, progressie: "3×12 → rugzak 4kg → terug naar 8" },
+      { naam: "Face pulls / band rows", target: "3×15–20", rust: "45 sec", rir: "1–2", eenheid: "reps", trackable: true, progressie: "1 tel knijppauze" },
+      { naam: "Single-arm biceps curl", target: "3×8–12/arm", rust: "60 sec", rir: "0–1", gewicht: 10, eenheid: "reps", trackable: true, progressie: "3×12 → tempo 3-1-1 → 1,5-reps" }
+    ],
+    "Dag C": [
+      { naam: "Inverted rows (of single-arm DB row, tempo 2-1-2)", target: "3×10–15", rust: "75 sec", rir: "0–1", gewicht: 10, eenheid: "reps", trackable: true, progressie: "Voeten hoger → langzamer tempo → rugzak" },
+      { naam: "Single-arm lateral raise", target: "3×12–15/arm", rust: "60 sec", rir: "0–1", gewicht: 5.5, eenheid: "reps", trackable: true, progressie: "Reps → +1kg" },
+      { naam: "Overhead triceps extension (optioneel)", target: "2×10–12/arm", rust: "60 sec", rir: "1", gewicht: 10, eenheid: "reps", trackable: true, progressie: "Reps → tempo" },
+      { naam: "Single-arm hammer curl (optioneel)", target: "2×10–12/arm", rust: "60 sec", rir: "1", gewicht: 10, eenheid: "reps", trackable: true, progressie: "Reps → tempo" }
+    ]
+  }
+};
+
 const OEFENING_UITLEG = {
   // ---------- Skill: Planche ----------
   "Planche lean": {
@@ -1243,23 +1529,23 @@ const SCHEMA = {
       skill: {
         naam: "Planche",
         oefeningen: [
-          { naam: "Planche lean", target: "3×15–20 sec", rust: "60 sec", focus: "Scapulae geprotracteerd, ellebogen gelockt, schouders vóór de handen", progressie: "Meer lean vóór langere hold" },
-          { naam: "Advanced tuck planche", target: "4×8–12 sec", rust: "90 sec", focus: "Heupen open, knieën getukt, PPT, rug rond", progressie: "4×8 → 4×12 → 5×12 → straddle-aanzet testen" },
-          { naam: "Tuck planche (schrappen bij tijdgebrek)", target: "1×20–30 sec", rust: "—", focus: "Kwaliteitsset", progressie: "Onderhoud" }
+          { naam: "Planche lean", target: "3×15–20 sec", rust: "60 sec", eenheid: "sec", focus: "Scapulae geprotracteerd, ellebogen gelockt, schouders vóór de handen", progressie: "Meer lean vóór langere hold" },
+          { naam: "Advanced tuck planche", target: "4×8–12 sec", rust: "90 sec", eenheid: "sec", focus: "Heupen open, knieën getukt, PPT, rug rond", progressie: "4×8 → 4×12 → 5×12 → straddle-aanzet testen" },
+          { naam: "Tuck planche (schrappen bij tijdgebrek)", target: "1×20–30 sec", rust: "—", eenheid: "sec", focus: "Kwaliteitsset", progressie: "Onderhoud" }
         ]
       },
       strength: [
-        { naam: "Weighted dips", target: "4×5–8", rust: "150 sec", rir: "1–2", gewicht: 8, trackable: true, progressie: "4×8 @8kg → +2kg → terug naar 5-6" },
-        { naam: "Weighted push-ups, voeten verhoogd", target: "3×8–12", rust: "90 sec", rir: "1", gewicht: 8, trackable: true, progressie: "3×12 → +2kg → terug naar 8" }
+        { naam: "Weighted dips", target: "4×5–8", rust: "150 sec", rir: "1–2", gewicht: 8, eenheid: "reps", trackable: true, progressie: "4×8 @8kg → +2kg → terug naar 5-6" },
+        { naam: "Weighted push-ups, voeten verhoogd", target: "3×8–12", rust: "90 sec", rir: "1", gewicht: 8, eenheid: "reps", trackable: true, progressie: "3×12 → +2kg → terug naar 8" }
       ],
       hypertrophy: [
-        { naam: "Pseudo planche push-ups", target: "3×6–10", rust: "90 sec", rir: "1–2", trackable: true, progressie: "Meer lean → daarna rugzak 4kg" },
-        { naam: "Single-arm lateral raise", target: "3×12–15/arm", rust: "60 sec", rir: "0–1", gewicht: 5.5, trackable: true, progressie: "Armen wisselen zonder rust ertussen" },
-        { naam: "Band pull-aparts / face pulls", target: "3×15–20", rust: "45 sec", rir: "1–2", trackable: true, progressie: "Kortere greep = meer spanning" }
+        { naam: "Pseudo planche push-ups", target: "3×6–10", rust: "90 sec", rir: "1–2", eenheid: "reps", trackable: true, progressie: "Meer lean → daarna rugzak 4kg" },
+        { naam: "Single-arm lateral raise", target: "3×12–15/arm", rust: "60 sec", rir: "0–1", gewicht: 5.5, eenheid: "reps", trackable: true, progressie: "Armen wisselen zonder rust ertussen" },
+        { naam: "Band pull-aparts / face pulls", target: "3×15–20", rust: "45 sec", rir: "1–2", eenheid: "reps", trackable: true, progressie: "Kortere greep = meer spanning" }
       ],
       legs: [
-        { naam: "Bulgarian split squat", target: "3×8–12/been", rust: "75 sec", rir: "1–2", gewicht: 10, trackable: true, progressie: "3×12 → tempo 3-1-1 → 1,5-reps" },
-        { naam: "Single-leg calf raise op traptrede", target: "2×12–20/been", rust: "45 sec", rir: "0–1", trackable: true, progressie: "Reps → pauze onderin → 10kg vasthouden" }
+        { naam: "Bulgarian split squat", target: "3×8–12/been", rust: "75 sec", rir: "1–2", gewicht: 10, eenheid: "reps", trackable: true, progressie: "3×12 → tempo 3-1-1 → 1,5-reps" },
+        { naam: "Single-leg calf raise op traptrede", target: "2×12–20/been", rust: "45 sec", rir: "0–1", eenheid: "reps", trackable: true, progressie: "Reps → pauze onderin → 10kg vasthouden" }
       ],
       cooldown: [
         { naam: "Borststretch deurpost", target: "2×30 sec", sec: 60 },
@@ -1285,21 +1571,21 @@ const SCHEMA = {
       skill: {
         naam: "Front Lever",
         oefeningen: [
-          { naam: "Advanced tuck front lever", target: "4×8–12 sec", rust: "90 sec", focus: "Heupen open, rug rond, scapulae gedepresseerd + geretracteerd, armen kaarsrecht", progressie: "4×12 → 5×12 → single-leg testen" },
-          { naam: "Tuck front lever raises", target: "3×5–6", rust: "75 sec", focus: "3 sec excentrisch, geen swing", progressie: "Reps → advanced tuck raises" }
+          { naam: "Advanced tuck front lever", target: "4×8–12 sec", rust: "90 sec", eenheid: "sec", focus: "Heupen open, rug rond, scapulae gedepresseerd + geretracteerd, armen kaarsrecht", progressie: "4×12 → 5×12 → single-leg testen" },
+          { naam: "Tuck front lever raises", target: "3×5–6", rust: "75 sec", eenheid: "reps", focus: "3 sec excentrisch, geen swing", progressie: "Reps → advanced tuck raises" }
         ]
       },
       strength: [
-        { naam: "Weighted pull-ups", target: "4×5–7", rust: "180 sec", rir: "1–2", gewicht: 8, trackable: true, progressie: "4×7 @8kg → +2kg → terug naar 5" },
-        { naam: "Front lever rows (tuck/advanced tuck)", target: "3×5–8", rust: "120 sec", rir: "1–2", trackable: true, progressie: "Alternatief bij lage stang/tafel: inverted rows voeten verhoogd, 3×8–12" }
+        { naam: "Weighted pull-ups", target: "4×5–7", rust: "180 sec", rir: "1–2", gewicht: 8, eenheid: "reps", trackable: true, progressie: "4×7 @8kg → +2kg → terug naar 5" },
+        { naam: "Front lever rows (tuck/advanced tuck)", target: "3×5–8", rust: "120 sec", rir: "1–2", eenheid: "reps", trackable: true, progressie: "Alternatief bij lage stang/tafel: inverted rows voeten verhoogd, 3×8–12" }
       ],
       hypertrophy: [
-        { naam: "Chin-ups", target: "3×8–12", rust: "90 sec", rir: "1", trackable: true, progressie: "3×12 → rugzak 4kg → terug naar 8" },
-        { naam: "Face pulls / band rows", target: "3×15–20", rust: "45 sec", rir: "1–2", trackable: true, progressie: "1 tel knijppauze" },
-        { naam: "Single-arm biceps curl", target: "3×8–12/arm", rust: "60 sec", rir: "0–1", gewicht: 10, trackable: true, progressie: "3×12 → tempo 3-1-1 → 1,5-reps" }
+        { naam: "Chin-ups", target: "3×8–12", rust: "90 sec", rir: "1", eenheid: "reps", trackable: true, progressie: "3×12 → rugzak 4kg → terug naar 8" },
+        { naam: "Face pulls / band rows", target: "3×15–20", rust: "45 sec", rir: "1–2", eenheid: "reps", trackable: true, progressie: "1 tel knijppauze" },
+        { naam: "Single-arm biceps curl", target: "3×8–12/arm", rust: "60 sec", rir: "0–1", gewicht: 10, eenheid: "reps", trackable: true, progressie: "3×12 → tempo 3-1-1 → 1,5-reps" }
       ],
       legs: [
-        { naam: "Single-leg RDL", target: "3×10–12/been", rust: "75 sec", rir: "1–2", gewicht: 10, trackable: true, progressie: "Reps → 3 sec excentrisch → deficit (op boek staan)" }
+        { naam: "Single-leg RDL", target: "3×10–12/been", rust: "75 sec", rir: "1–2", gewicht: 10, eenheid: "reps", trackable: true, progressie: "Reps → 3 sec excentrisch → deficit (op boek staan)" }
       ],
       cooldown: [
         { naam: "Latstretch", target: "2×30 sec", sec: 60 },
@@ -1325,23 +1611,23 @@ const SCHEMA = {
       skill: {
         naam: "Handstand",
         oefeningen: [
-          { naam: "Chest-to-wall handstand", target: "4×20–40 sec", rust: "75 sec", focus: "Ribben in, PPT, schouders volledig geëleveerd, kijk naar handen", progressie: "Holdduur → één been los → beide benen" },
-          { naam: "Kick-up practice (freestanding)", target: "8–10 pogingen", rust: "20 sec", focus: "Lichte kick, balanspunt zoeken, corrigeren met vingers. Stoppen zodra pogingen slordig worden", progressie: "Balansmoment → 3 sec → 5 sec → 10 sec" },
-          { naam: "Handstand shoulder shrugs aan muur", target: "2×8–10", rust: "60 sec", focus: "Volledige elevatie/depressie scapulae", progressie: "Reps → langzamer tempo" }
+          { naam: "Chest-to-wall handstand", target: "4×20–40 sec", rust: "75 sec", eenheid: "sec", focus: "Ribben in, PPT, schouders volledig geëleveerd, kijk naar handen", progressie: "Holdduur → één been los → beide benen" },
+          { naam: "Kick-up practice (freestanding)", target: "8–10 pogingen", rust: "20 sec", eenheid: "reps", focus: "Lichte kick, balanspunt zoeken, corrigeren met vingers. Stoppen zodra pogingen slordig worden", progressie: "Balansmoment → 3 sec → 5 sec → 10 sec" },
+          { naam: "Handstand shoulder shrugs aan muur", target: "2×8–10", rust: "60 sec", eenheid: "reps", focus: "Volledige elevatie/depressie scapulae", progressie: "Reps → langzamer tempo" }
         ]
       },
       strength: [
-        { naam: "Deficit pike push-ups (voeten op stoel/bed, handen op boeken)", target: "4×6–10", rust: "120 sec", rir: "1–2", trackable: true, progressie: "Reps → voeten hoger → grotere deficit → wall HSPU" },
-        { naam: "Archer push-ups", target: "3×6–8/kant", rust: "120 sec", rir: "1–2", trackable: true, progressie: "Reps → minder steun van de gestrekte arm" }
+        { naam: "Deficit pike push-ups (voeten op stoel/bed, handen op boeken)", target: "4×6–10", rust: "120 sec", rir: "1–2", eenheid: "reps", trackable: true, progressie: "Reps → voeten hoger → grotere deficit → wall HSPU" },
+        { naam: "Archer push-ups", target: "3×6–8/kant", rust: "120 sec", rir: "1–2", eenheid: "reps", trackable: true, progressie: "Reps → minder steun van de gestrekte arm" }
       ],
       hypertrophy: [
-        { naam: "Inverted rows (of single-arm DB row, tempo 2-1-2)", target: "3×10–15", rust: "75 sec", rir: "0–1", gewicht: 10, trackable: true, progressie: "Voeten hoger → langzamer tempo → rugzak" },
-        { naam: "Single-arm lateral raise", target: "3×12–15/arm", rust: "60 sec", rir: "0–1", gewicht: 5.5, trackable: true, progressie: "Reps → +1kg" },
-        { naam: "Overhead triceps extension (optioneel)", target: "2×10–12/arm", rust: "60 sec", rir: "1", gewicht: 10, trackable: true, progressie: "Reps → tempo" },
-        { naam: "Single-arm hammer curl (optioneel)", target: "2×10–12/arm", rust: "60 sec", rir: "1", gewicht: 10, trackable: true, progressie: "Reps → tempo" }
+        { naam: "Inverted rows (of single-arm DB row, tempo 2-1-2)", target: "3×10–15", rust: "75 sec", rir: "0–1", gewicht: 10, eenheid: "reps", trackable: true, progressie: "Voeten hoger → langzamer tempo → rugzak" },
+        { naam: "Single-arm lateral raise", target: "3×12–15/arm", rust: "60 sec", rir: "0–1", gewicht: 5.5, eenheid: "reps", trackable: true, progressie: "Reps → +1kg" },
+        { naam: "Overhead triceps extension (optioneel)", target: "2×10–12/arm", rust: "60 sec", rir: "1", gewicht: 10, eenheid: "reps", trackable: true, progressie: "Reps → tempo" },
+        { naam: "Single-arm hammer curl (optioneel)", target: "2×10–12/arm", rust: "60 sec", rir: "1", gewicht: 10, eenheid: "reps", trackable: true, progressie: "Reps → tempo" }
       ],
       legs: [
-        { naam: "Pistol-progressie (box pistol of band/deurpost-geassisteerd)", target: "3×5–8/been", rust: "90 sec", rir: "2", trackable: true, progressie: "Lagere box → minder handsteun → volledige pistol. Verlaag de box pas bij 3×8/been zonder wegkantelende knie" }
+        { naam: "Pistol-progressie (box pistol of band/deurpost-geassisteerd)", target: "3×5–8/been", rust: "90 sec", rir: "2", eenheid: "reps", trackable: true, progressie: "Lagere box → minder handsteun → volledige pistol. Verlaag de box pas bij 3×8/been zonder wegkantelende knie" }
       ],
       cooldown: [
         { naam: "Schouderstretch", target: "2×30 sec", sec: 60 },
@@ -1362,16 +1648,16 @@ const SCHEMA = {
         { naam: "Korte warm-up", sec: 300 }
       ],
       skill: {
-        naam: "Onderhoud (2 sets van je huidige skill-focus)",
+        naam: "Onderhoud — kies bij het loggen je skill-hold",
         oefeningen: [
-          { naam: "Skill-hold naar keuze (planche / front lever / handstand)", target: "2 sets", rust: "60 sec", focus: "Kwaliteit boven duur", progressie: "Onderhoud, geen opbouw" }
+          { naam: "Skill-hold (planche / front lever / handstand — kies bij het loggen)", target: "2 sets", rust: "—", eenheid: "sec", focus: "Kwaliteit boven duur", progressie: "Onderhoud, geen opbouw" }
         ]
       },
       strength: [
-        { naam: "Weighted dips", target: "4×5–8", rust: "150 sec", rir: "1–2", gewicht: 8, trackable: true, progressie: "Vervang door pull-ups (Dag B) of deficit pike push-ups (Dag C) al naar gelang welke dag je inhaalt" }
+        { naam: "Hoofdoefening (dips / pull-ups / deficit pike — kies bij het loggen)", target: "kies bij loggen", rust: "—", rir: "1–2", eenheid: "reps", trackable: true, progressie: "Vervang door pull-ups (Dag B) of deficit pike push-ups (Dag C) al naar gelang welke dag je inhaalt" }
       ],
       hypertrophy: [
-        { naam: "1 accessoire-oefening naar keuze", target: "3×10–12", rust: "60 sec", rir: "1–2", trackable: true, progressie: "Onderhoud" }
+        { naam: "1 accessoire-oefening — kies bij het loggen (per dag A/B/C)", target: "kies bij loggen", rust: "—", rir: "1–2", eenheid: "reps", trackable: true, progressie: "Onderhoud" }
       ],
       legs: [],
       cooldown: [
@@ -1411,13 +1697,24 @@ const VOEDING_INFO = [
   { punt: "Let op", richtlijn: "Zwaarder worden maakt planche en front lever tijdelijk moeilijker — normaal" }
 ];
 
-// Alle "trackable" oefeningen, verzameld voor de progressie-pagina
+// Alle "trackable" oefeningen (strength/hypertrophy/legs) + skill-holds, voor de progressie-pagina.
+// OEFENING_EENHEID onthoudt per naam of het om reps of seconden gaat, en of er een gewicht bij hoort.
+const OEFENING_EENHEID = {};
 const ALLE_OEFENINGEN = (() => {
   const namen = new Set();
   SCHEMA.dagen.forEach(dag => {
     [...(dag.strength || []), ...(dag.hypertrophy || []), ...(dag.legs || [])].forEach(o => {
-      if (o.trackable) namen.add(o.naam);
+      if (o.trackable) {
+        namen.add(o.naam);
+        OEFENING_EENHEID[o.naam] = { eenheid: o.eenheid || 'reps', heeftGewicht: true };
+      }
     });
+    if (dag.skill && dag.skill.oefeningen) {
+      dag.skill.oefeningen.forEach(o => {
+        namen.add(o.naam);
+        OEFENING_EENHEID[o.naam] = { eenheid: o.eenheid || 'sec', heeftGewicht: false };
+      });
+    }
   });
   return Array.from(namen);
 })();
@@ -1439,9 +1736,9 @@ const VORM_OPTIES = [
 
 const REPS_OPTIES = Array.from({ length: 30 }, (_, i) => i + 1); // 1–30
 const GEWICHT_OPTIES = (() => {
-  // 0 t/m 20kg in stappen van 1.25kg — past bij de schijven die Jibbe heeft
+  // 0 t/m 20kg in stappen van 0.5kg
   const opts = [];
-  for (let g = 0; g <= 20; g += 1.25) opts.push(Math.round(g * 100) / 100);
+  for (let g = 0; g <= 20; g += 0.5) opts.push(Math.round(g * 100) / 100);
   return opts;
 })();
 
@@ -1467,6 +1764,8 @@ let ingelogd = false; // placeholder — wordt vervangen door echte Firebase Aut
 let actieveChart = null;
 let huidigLogDag = null;
 let pendingVerlaatHash = null; // welke navigatie wacht op bevestiging via de verlaat-popup
+let noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null }; // gemaakte keuzes voor de noodversie
+let noodKeuzeActief = false; // true zodra het keuzescherm is geopend, tot de sessie eindigt
 let huidigProgressieOefening = ALLE_OEFENINGEN[0];
 
 function toast(msg) {
@@ -1569,6 +1868,8 @@ function verlaatPopupOpslaanEnGa() {
   logIndex = 0;
   timerState = {};
   uitlegOpen = {};
+  noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null };
+  noodKeuzeActief = false;
   document.getElementById('verlaatPopup').classList.remove('show');
   pendingVerlaatHash = null;
   laatsteBevestigdeHash = '#' + doel;
@@ -1583,6 +1884,8 @@ function verlaatPopupZonderOpslaan() {
   logIndex = 0;
   timerState = {};
   uitlegOpen = {};
+  noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null };
+  noodKeuzeActief = false;
   document.getElementById('verlaatPopup').classList.remove('show');
   pendingVerlaatHash = null;
   laatsteBevestigdeHash = '#' + doel;
@@ -1722,6 +2025,9 @@ function renderDagDetail(dagId) {
     </div>` : '';
 
   app.innerHTML = `
+    <div class="block" style="margin-top:20px;">
+      <button class="btn primary full" onclick="go('loggen/${dag.id}')">Deze training loggen</button>
+    </div>
     ${opmerkingHtml}
     ${warmupHtml}
     ${skillHtml}
@@ -1752,15 +2058,41 @@ function timerSeconden(item) {
   return Math.round((laag + hoog) / 2);
 }
 
-function renderTimerBlock(key, seconden) {
+function rustSeconden(item) {
+  // Haalt de rusttijd tussen sets uit item.rust, bv. "150 sec", "90–120 sec", of "—" (geen rust)
+  const rust = item.rust || '';
+  const match = rust.match(/(\d+)(?:–(\d+))?\s*sec/);
+  if (!match) return null;
+  const laag = parseInt(match[1]);
+  const hoog = match[2] ? parseInt(match[2]) : laag;
+  return Math.round((laag + hoog) / 2);
+}
+
+function parseSetsEnTijd(target) {
+  // Haalt uit een target-string zowel het aantal sets als de tijd PER SET.
+  // "2×20–30 sec" -> { sets: 2, secPerSet: 25 }
+  // "2×30 sec"    -> { sets: 2, secPerSet: 30 }
+  // "4 per kant"  -> null (geen tijd-component, dit zijn geen sets-met-seconden)
+  if (!target) return null;
+  const match = target.match(/^(\d+)\s*×\s*(\d+)(?:–(\d+))?\s*sec/);
+  if (!match) return null;
+  const sets = parseInt(match[1]);
+  const laag = parseInt(match[2]);
+  const hoog = match[3] ? parseInt(match[3]) : laag;
+  const secPerSet = Math.round((laag + hoog) / 2);
+  return { sets, secPerSet };
+}
+
+function renderTimerBlock(key, seconden, label) {
   if (!seconden) return '';
   const state = timerState[key] || { actief: false, resterend: seconden, totaal: seconden, done: false };
   timerState[key] = state;
+  const labelTekst = label || 'Timer';
 
   return `
     <div class="timer-box">
       <div class="timer-toggle" onclick="toggleTimerVisible('${key}')">
-        <span class="tt-label">⏱ Timer${state.toonTimer ? ' verbergen' : ` · ${seconden}s`}</span>
+        <span class="tt-label">⏱ ${labelTekst}${state.toonTimer ? ' verbergen' : ` · ${seconden}s`}</span>
         <div class="switch ${state.toonTimer ? 'on' : ''}"><div class="knob"></div></div>
       </div>
       ${state.toonTimer ? renderTimerRing(key) : ''}
@@ -1897,6 +2229,37 @@ function renderLoggen(dagId) {
     return;
   }
 
+  // Noodversie: eerst skill/strength/hypertrophy laten kiezen voordat de kaart-flow start.
+  if (dag.isNoodtraining) {
+    if (!noodKeuzeActief) {
+      // Echte nieuwe start (vanuit het dag-overzicht): keuzes leegmaken en de sessie openen.
+      noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null };
+      noodKeuzeActief = true;
+    }
+    const alleKeuzesGemaakt = noodKeuze.skill && noodKeuze.strength && noodKeuze.hypertrophy;
+    if (!alleKeuzesGemaakt) {
+      renderNoodKeuzeScherm(dag);
+      return;
+    }
+    if (!huidigLogDag || huidigLogDag.id !== dag.id || !huidigLogDag._noodOpgebouwd) {
+      huidigLogDag = dag;
+      huidigLogDag._noodOpgebouwd = true;
+      logOefeningen = [
+        { type: 'warmup', naam: 'Warm-up', items: dag.warmup },
+        { type: 'skill', ...noodKeuze.skill },
+        { type: 'strength', ...noodKeuze.strength },
+        { type: 'hypertrophy', ...noodKeuze.hypertrophy },
+        { type: 'cooldown', naam: 'Cooldown', items: dag.cooldown }
+      ];
+      logIndex = 0;
+      logData = {};
+      timerState = {};
+      uitlegOpen = {};
+    }
+    renderLogKaart();
+    return;
+  }
+
   if (!huidigLogDag || huidigLogDag.id !== dag.id) {
     huidigLogDag = dag;
     logOefeningen = [
@@ -1957,12 +2320,34 @@ function renderLogKaart() {
 function renderWarmupCooldownKaart(item, idx) {
   const isCooldown = item.type === 'cooldown';
   const itemsHtml = item.items.map((w, wi) => {
-    const key = `${idx}_${wi}`;
+    const setsInfo = parseSetsEnTijd(w.target);
+
+    let timersHtml = '';
+    if (setsInfo) {
+      // Sets×seconden-item (bv. "2×30 sec", "2×15 sec"): één losse timer per set.
+      let setTimers = '';
+      for (let s = 1; s <= setsInfo.sets; s++) {
+        const key = `${idx}_${wi}_${s}`;
+        setTimers += `
+          <div class="wc-set-timer">
+            <span class="wc-set-label">Set ${s}</span>
+            ${renderTimerBlock(key, setsInfo.secPerSet)}
+          </div>
+        `;
+      }
+      timersHtml = setTimers;
+    } else if (!w.target && w.sec) {
+      // Geen target-structuur, puur een doorlopende tijdsduur (bv. "Jumping jacks", "Polsroutine").
+      const key = `${idx}_${wi}`;
+      timersHtml = renderTimerBlock(key, w.sec);
+    }
+    // Overige gevallen (target zonder "sec", zoals "2×15" reps of "4 per kant"): geen timer.
+
     return `
       <div class="wc-item">
         <div class="wc-name">${w.naam}</div>
         <div class="wc-dur">${w.target ? w.target : `${w.sec}s`}</div>
-        ${renderTimerBlock(key, w.sec)}
+        ${timersHtml}
       </div>
     `;
   }).join('');
@@ -2007,60 +2392,76 @@ function toggleUitleg(idx) {
 // DRAAIWIEL — halve-cirkel dial control voor reps/seconden per set
 // ============================================================
 // ============================================================
-// LINEAAL-CONTROL — horizontale schuifbare meetlat met vaste middenwijzer,
-// vervangt de eerdere halve-cirkel-draaiknop. Zelfde functienamen zodat
-// de rest van de code (renderOefeningKaart) ongewijzigd kan blijven.
+// LINEAAL-CONTROL — schuifbare meetlat met vaste middenwijzer, horizontaal
+// (reps/seconden) of verticaal (gewicht). Vloeiend slepen, magneet-snap naar
+// de dichtstbijzijnde stap bij loslaten, geen +/- knoppen.
 // ============================================================
 
-// Hoeveel px op het scherm één eenheid (1 sec of 1 rep) inneemt op de lineaal.
+// Hoeveel px op het scherm één stap inneemt op de lineaal.
 const LINEAAL_PX_PER_EENHEID = 18;
 
-function renderDraaiwiel(id, waarde, max, eenheid) {
-  const veilig = Math.max(0, Math.min(max, parseInt(waarde) || 0));
+function renderDraaiwiel(id, waarde, max, eenheid, richting, stap) {
+  richting = richting || 'horizontaal';
+  stap = stap || 1;
+  const veilig = Math.max(0, Math.min(max, parseFloat(waarde) || 0));
+  const isVert = richting === 'verticaal';
+  const aantalTikken = Math.round(max / stap);
+  // Om de hoeveel stappen een groot streepje + cijfer komt. Gekozen zodat er, net als bij
+  // gewicht, altijd meerdere referentiepunten tegelijk zichtbaar zijn in het venster
+  // (venster ≈ 200px, dus grootElke * LINEAAL_PX_PER_EENHEID moet daar ruim onder blijven).
+  const grootElke = stap < 1 ? Math.round(1 / stap) : 3;
 
-  // Bouw de tik-strook: klein streepje per eenheid, groot streepje + cijfer per 5.
+  // Elke stap krijgt een streepje (klein), elke grootElke-ste stap een groter streepje + cijfer.
   let tikjes = '';
-  for (let i = 0; i <= max; i++) {
-    const groot = i % 5 === 0;
-    const x = i * LINEAAL_PX_PER_EENHEID;
-    tikjes += `<div class="lineaal-tik ${groot ? 'groot' : ''}" style="left:${x}px"></div>`;
+  for (let i = 0; i <= aantalTikken; i++) {
+    const stapWaarde = Math.round(i * stap * 100) / 100;
+    const groot = i % grootElke === 0;
+    const pos = i * LINEAAL_PX_PER_EENHEID;
+    const posProp = isVert ? 'top' : 'left';
+    tikjes += `<div class="lineaal-tik ${groot ? 'groot' : ''}" style="${posProp}:${pos}px"></div>`;
     if (groot) {
-      tikjes += `<div class="lineaal-cijfer" style="left:${x}px">${i}</div>`;
+      tikjes += `<div class="lineaal-cijfer" style="${posProp}:${pos}px">${stapWaarde}</div>`;
     }
   }
 
   return `
-    <div class="lineaal-wrap" id="wrap_${id}">
-      <div class="lineaal-wijzer"></div>
+    <div class="lineaal-wrap ${isVert ? 'verticaal' : ''}" id="wrap_${id}">
       <div class="lineaal-venster" id="venster_${id}">
-        <div class="lineaal-strook" id="strook_${id}" data-max="${max}" data-value="${veilig}" data-id="${id}">
+        <div class="lineaal-wijzer"></div>
+        <div class="lineaal-strook" id="strook_${id}" data-max="${max}" data-stap="${stap}" data-value="${veilig}" data-id="${id}">
           ${tikjes}
         </div>
+        <div class="lineaal-fade lineaal-fade-l"></div>
+        <div class="lineaal-fade lineaal-fade-r"></div>
       </div>
-      <div class="lineaal-fade lineaal-fade-l"></div>
-      <div class="lineaal-fade lineaal-fade-r"></div>
-      <div class="draaiwiel-controls">
-        <button type="button" class="draaiwiel-btn" onclick="draaiwielStap('${id}', -1)">−</button>
-        <div class="draaiwiel-waarde"><span id="val_${id}">${veilig}</span><span class="draaiwiel-eenheid">${eenheid}</span></div>
-        <button type="button" class="draaiwiel-btn" onclick="draaiwielStap('${id}', 1)">+</button>
-      </div>
+      <div class="draaiwiel-waarde"><span id="val_${id}">${veilig}</span></div>
       <input type="hidden" id="${id}" value="${veilig}">
     </div>
   `;
 }
 
+function draaiwielIsVert(strook) {
+  return strook.closest('.lineaal-wrap').classList.contains('verticaal');
+}
+
+function draaiwielFormatteer(waarde, stap) {
+  // Bij hele stappen (reps) een heel getal tonen, bij decimale stappen (gewicht) netjes afronden.
+  return stap < 1 ? (Math.round(waarde * 2) / 2).toString() : Math.round(waarde).toString();
+}
+
 function draaiwielUpdateVisueel(id, waarde, magTrillen) {
   const strook = document.getElementById(`strook_${id}`);
   if (!strook) return;
-  const max = parseInt(strook.dataset.max);
-  const vorige = parseInt(strook.dataset.value);
+  const max = parseFloat(strook.dataset.max);
+  const stap = parseFloat(strook.dataset.stap) || 1;
+  const vorige = parseFloat(strook.dataset.value);
   const veilig = Math.max(0, Math.min(max, waarde));
+  const isVert = draaiwielIsVert(strook);
 
-  // De strook verschuiven zodat de waarde precies onder de vaste middenwijzer valt.
-  const offsetPx = veilig * LINEAAL_PX_PER_EENHEID;
-  strook.style.transform = `translateX(-${offsetPx}px)`;
+  const offsetPx = (veilig / stap) * LINEAAL_PX_PER_EENHEID;
+  strook.style.transform = isVert ? `translateY(-${offsetPx}px)` : `translateX(-${offsetPx}px)`;
 
-  document.getElementById(`val_${id}`).textContent = veilig;
+  document.getElementById(`val_${id}`).textContent = draaiwielFormatteer(veilig, stap);
   document.getElementById(id).value = veilig;
   strook.dataset.value = veilig;
 
@@ -2069,42 +2470,76 @@ function draaiwielUpdateVisueel(id, waarde, magTrillen) {
   }
 }
 
-function draaiwielStap(id, delta) {
+// Tijdens het slepen: de strook vloeiend op de exacte (niet-gekwantiseerde) pixelpositie
+// zetten, geen snap en geen trilling. Het cijfer toont alvast de dichtstbijzijnde stap.
+function draaiwielUpdateVloeiend(id, exacteWaarde) {
   const strook = document.getElementById(`strook_${id}`);
-  const huidig = parseInt(strook.dataset.value);
-  draaiwielUpdateVisueel(id, huidig + delta);
+  if (!strook) return;
+  const max = parseFloat(strook.dataset.max);
+  const stap = parseFloat(strook.dataset.stap) || 1;
+  const veilig = Math.max(0, Math.min(max, exacteWaarde));
+  const isVert = draaiwielIsVert(strook);
+
+  const offsetPx = (veilig / stap) * LINEAAL_PX_PER_EENHEID;
+  strook.style.transform = isVert ? `translateY(-${offsetPx}px)` : `translateX(-${offsetPx}px)`;
+
+  const dichtstbijzijnd = Math.round(veilig / stap) * stap;
+  document.getElementById(`val_${id}`).textContent = draaiwielFormatteer(dichtstbijzijnd, stap);
+  strook.dataset.slependeWaarde = veilig;
 }
 
-function draaiwielVanPositie(id, clientX, startX, startWaarde) {
+// Bij loslaten: snap (met korte animatie) naar de dichtstbijzijnde stap,
+// werk de echte waarde bij, en trilt daar precies één keer.
+function draaiwielSnapNaarDichtstbijzijnde(id) {
   const strook = document.getElementById(`strook_${id}`);
-  const max = parseInt(strook.dataset.max);
-  const deltaPx = clientX - startX;
-  const deltaEenheden = Math.round(deltaPx / LINEAAL_PX_PER_EENHEID);
-  const nieuweWaarde = startWaarde - deltaEenheden; // naar rechts slepen = waarde omlaag (strook schuift mee naar rechts)
-  draaiwielUpdateVisueel(id, nieuweWaarde);
+  if (!strook) return;
+  const stap = parseFloat(strook.dataset.stap) || 1;
+  const exact = parseFloat(strook.dataset.slependeWaarde);
+  const bron = isNaN(exact) ? parseFloat(strook.dataset.value) : exact;
+  const dichtstbijzijnd = Math.round(bron / stap) * stap;
+
+  strook.classList.add('snappen');
+  draaiwielUpdateVisueel(id, dichtstbijzijnd, true);
+  setTimeout(() => strook.classList.remove('snappen'), 180);
+}
+
+function draaiwielVanPositie(id, clientPos, startPos, startWaarde) {
+  const strook = document.getElementById(`strook_${id}`);
+  const stap = parseFloat(strook.dataset.stap) || 1;
+  const deltaPx = clientPos - startPos;
+  const deltaStappen = deltaPx / LINEAAL_PX_PER_EENHEID; // NIET afgerond — vloeiende sleep
+  const exacteWaarde = startWaarde - (deltaStappen * stap); // slepen "voorwaarts" = waarde omlaag, strook schuift mee
+  draaiwielUpdateVloeiend(id, exacteWaarde);
 }
 
 function draaiwielInit(id) {
   const venster = document.getElementById(`venster_${id}`);
   const strook = document.getElementById(`strook_${id}`);
   if (!venster || !strook) return;
+  const isVert = draaiwielIsVert(strook);
   let slepen = false;
-  let startX = 0;
-  let startWaarde = parseInt(strook.dataset.value);
+  let startPos = 0;
+  let startWaarde = parseFloat(strook.dataset.value);
 
   const start = (e) => {
     slepen = true;
+    strook.classList.remove('snappen');
     const point = e.touches ? e.touches[0] : e;
-    startX = point.clientX;
-    startWaarde = parseInt(strook.dataset.value);
+    startPos = isVert ? point.clientY : point.clientX;
+    startWaarde = parseFloat(strook.dataset.value);
     e.preventDefault();
   };
   const beweeg = (e) => {
     if (!slepen) return;
     const point = e.touches ? e.touches[0] : e;
-    draaiwielVanPositie(id, point.clientX, startX, startWaarde);
+    const pos = isVert ? point.clientY : point.clientX;
+    draaiwielVanPositie(id, pos, startPos, startWaarde);
   };
-  const stop = () => { slepen = false; };
+  const stop = () => {
+    if (!slepen) return;
+    slepen = false;
+    draaiwielSnapNaarDichtstbijzijnde(id);
+  };
 
   venster.addEventListener('mousedown', start);
   venster.addEventListener('touchstart', start, { passive: false });
@@ -2117,51 +2552,56 @@ function draaiwielInit(id) {
 
 function renderOefeningKaart(o, idx) {
   const isSkill = o.type === 'skill';
+  const isTijd = o.eenheid === 'sec'; // expliciet per oefening bepaald, niet aangenomen op basis van categorie
   const numSets = parseInt((o.target.match(/^(\d+)×/) || [null, 3])[1]);
   const bewaard = logData[idx] || {};
   const holdSeconden = timerSeconden(o);
+  const rustSec = rustSeconden(o);
   const timerKey = `ex_${idx}`;
+  const rustTimerKey = `rust_${idx}`;
 
   let setsHtml = '';
   const repsWielIds = [];
+  const gewichtWielIds = [];
   for (let s = 1; s <= numSets; s++) {
     const bewaardeReps = bewaard.sets && bewaard.sets[s] ? bewaard.sets[s].reps : '';
     const bewaardeGewicht = bewaard.sets && bewaard.sets[s] ? bewaard.sets[s].gewicht : (o.gewicht || 0);
     const repsWielId = `reps_${s}`;
     repsWielIds.push(repsWielId);
-    const repsMax = isSkill ? 120 : 30;
+    const repsMax = isTijd ? 120 : 30;
     const repsStart = bewaardeReps !== '' ? bewaardeReps : 0;
+    const gewichtWielId = `gewicht_${s}`;
+    if (!isSkill) gewichtWielIds.push(gewichtWielId);
     setsHtml += `
-      <div class="set-row-wiel">
-        <div class="set-num">${s}</div>
-        <div class="set-wiel-kolom">
-          <label class="field-label">${isSkill ? 'Seconden' : 'Reps'}</label>
-          ${renderDraaiwiel(repsWielId, repsStart, repsMax, isSkill ? 'sec' : 'reps')}
+      <div class="set-blok">
+        <div class="set-blok-titel">Set ${s}</div>
+        <div class="set-blok-rij">
+          <div class="wiel-paneel reps-paneel">
+            <div class="wiel-paneel-titel">${isTijd ? 'Seconden' : 'Reps'}</div>
+            ${renderDraaiwiel(repsWielId, repsStart, repsMax, isTijd ? 'sec' : 'reps', 'horizontaal', 1)}
+          </div>
+          ${!isSkill ? `
+          <div class="wiel-paneel gewicht-paneel">
+            <div class="wiel-paneel-titel">Gewicht</div>
+            ${renderDraaiwiel(gewichtWielId, bewaardeGewicht, 20, 'kg', 'verticaal', 0.5)}
+          </div>` : ''}
         </div>
-        ${!isSkill ? `
-        <div>
-          <label class="field-label">Gewicht</label>
-          <select id="gewicht_${s}">
-            ${GEWICHT_OPTIES.map(g => `<option value="${g}" ${g === bewaardeGewicht ? 'selected' : ''}>${g}kg</option>`).join('')}
-          </select>
-        </div>` : ''}
       </div>
     `;
   }
 
   // Draaiwielen initialiseren zodra de kaart in de DOM staat: events koppelen
   // én de strook direct op de juiste startpositie zetten (geen trilling bij init).
-  setTimeout(() => repsWielIds.forEach(id => {
+  setTimeout(() => [...repsWielIds, ...gewichtWielIds].forEach(id => {
     draaiwielInit(id);
     const strook = document.getElementById(`strook_${id}`);
-    if (strook) draaiwielUpdateVisueel(id, parseInt(strook.dataset.value), false);
+    if (strook) draaiwielUpdateVisueel(id, parseFloat(strook.dataset.value), false);
   }), 0);
 
   return `
     <div class="log-ex log-ex-single">
       <div class="ex-title">${o.naam}</div>
       <div class="ex-target">Target: ${o.target}</div>
-      ${o.progressie ? `<div class="ex-progressie-log">↗ ${o.progressie}</div>` : ''}
       ${setsHtml}
       <div class="dual-select">
         <div>
@@ -2177,7 +2617,8 @@ function renderOefeningKaart(o, idx) {
           </select>
         </div>
       </div>
-      ${renderTimerBlock(timerKey, holdSeconden)}
+      ${renderTimerBlock(timerKey, holdSeconden, 'Hold-timer')}
+      ${renderTimerBlock(rustTimerKey, rustSec, 'Rust-timer')}
     </div>
   `;
 }
@@ -2229,7 +2670,101 @@ function logAfronden() {
   logIndex = 0;
   timerState = {};
   uitlegOpen = {};
+  noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null };
+  noodKeuzeActief = false;
   setTimeout(() => go('trainen/' + dagId), 900);
+}
+
+function renderNoodKeuzeScherm(dag) {
+  setHeader(`Loggen · ${dag.kort.replace('\n', ' ')}`, "Kies je invulling voor vandaag", [
+    { label: 'Home', action: () => go('home') },
+    { label: 'Trainen', action: () => go('trainen') },
+    { label: 'Loggen', action: () => {} }
+  ]);
+
+  const skillOpties = NOODVERSIE_KEUZES.skill.map((o, i) => `
+    <button class="nood-optie ${noodKeuze.skill && noodKeuze.skill.naam === o.naam ? 'gekozen' : ''}" onclick="kiesNoodSkill(${i})">
+      <div class="nood-optie-dag">${o.dag}</div>
+      <div class="nood-optie-naam">${o.naam}</div>
+      <div class="nood-optie-target">${o.target}</div>
+    </button>
+  `).join('');
+
+  const strengthOpties = NOODVERSIE_KEUZES.strength.map((o, i) => `
+    <button class="nood-optie ${noodKeuze.strength && noodKeuze.strength.naam === o.naam ? 'gekozen' : ''}" onclick="kiesNoodStrength(${i})">
+      <div class="nood-optie-dag">${o.dag}</div>
+      <div class="nood-optie-naam">${o.naam}</div>
+      <div class="nood-optie-target">${o.target}${o.gewicht ? ` · ${o.gewicht}kg` : ''}</div>
+    </button>
+  `).join('');
+
+  const dagenMetHypertrophy = Object.keys(NOODVERSIE_KEUZES.hypertrophy);
+  const dagKeuzeHtml = dagenMetHypertrophy.map(dagNaam => `
+    <button class="nood-optie compact ${noodKeuze.hypertrophyDag === dagNaam ? 'gekozen' : ''}" onclick="kiesNoodHypertrophyDag('${dagNaam}')">
+      <div class="nood-optie-naam">${dagNaam}</div>
+    </button>
+  `).join('');
+
+  let hypertrophyOefeningHtml = '';
+  if (noodKeuze.hypertrophyDag) {
+    const lijst = NOODVERSIE_KEUZES.hypertrophy[noodKeuze.hypertrophyDag];
+    hypertrophyOefeningHtml = `
+      <div class="nood-substap">
+        ${lijst.map((o, i) => `
+          <button class="nood-optie ${noodKeuze.hypertrophy && noodKeuze.hypertrophy.naam === o.naam ? 'gekozen' : ''}" onclick="kiesNoodHypertrophyOefening(${i})">
+            <div class="nood-optie-naam">${o.naam}</div>
+            <div class="nood-optie-target">${o.target}${o.gewicht ? ` · ${o.gewicht}kg` : ''}</div>
+          </button>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  const alleKeuzesGemaakt = noodKeuze.skill && noodKeuze.strength && noodKeuze.hypertrophy;
+
+  app.innerHTML = `
+    <div class="nood-keuze-blok">
+      <div class="nood-keuze-titel">1. Skill-hold ${noodKeuze.skill ? '✓' : ''}</div>
+      <div class="nood-optie-grid">${skillOpties}</div>
+    </div>
+    <div class="nood-keuze-blok">
+      <div class="nood-keuze-titel">2. Strength ${noodKeuze.strength ? '✓' : ''}</div>
+      <div class="nood-optie-grid">${strengthOpties}</div>
+    </div>
+    <div class="nood-keuze-blok">
+      <div class="nood-keuze-titel">3. Hypertrophy — kies eerst de dag ${noodKeuze.hypertrophy ? '✓' : ''}</div>
+      <div class="nood-optie-grid compact-grid">${dagKeuzeHtml}</div>
+      ${hypertrophyOefeningHtml}
+    </div>
+    ${alleKeuzesGemaakt ? `
+      <div class="block">
+        <button class="btn primary full" onclick="renderLoggen('${dag.id}')">Start met loggen</button>
+      </div>
+    ` : `
+      <div class="nood-keuze-hint">Maak alle 3 keuzes om te starten.</div>
+    `}
+  `;
+}
+
+function kiesNoodSkill(i) {
+  noodKeuze.skill = NOODVERSIE_KEUZES.skill[i];
+  renderNoodKeuzeScherm(huidigLogDag || SCHEMA.dagen.find(d => d.isNoodtraining));
+}
+
+function kiesNoodStrength(i) {
+  noodKeuze.strength = NOODVERSIE_KEUZES.strength[i];
+  renderNoodKeuzeScherm(huidigLogDag || SCHEMA.dagen.find(d => d.isNoodtraining));
+}
+
+function kiesNoodHypertrophyDag(dagNaam) {
+  noodKeuze.hypertrophyDag = dagNaam;
+  noodKeuze.hypertrophy = null; // reset de oefening-keuze als de dag wisselt
+  renderNoodKeuzeScherm(huidigLogDag || SCHEMA.dagen.find(d => d.isNoodtraining));
+}
+
+function kiesNoodHypertrophyOefening(i) {
+  noodKeuze.hypertrophy = NOODVERSIE_KEUZES.hypertrophy[noodKeuze.hypertrophyDag][i];
+  renderNoodKeuzeScherm(huidigLogDag || SCHEMA.dagen.find(d => d.isNoodtraining));
 }
 
 function renderLoginBox() {
@@ -2277,8 +2812,14 @@ function renderProgressieOverzicht() {
   app.innerHTML = `<div class="progress-tile-grid">${tegels}</div>`;
 }
 
+let progressieWeergave = { toonSets: true, toonGewicht: true, periode: 10 }; // welke lagen/periode actief zijn per oefening-pagina
+const PROGRESSIE_PERIODE_OPTIES = [5, 10, 20, 0]; // 0 = alles
+
 function renderProgressieDetail(oefeningNaam) {
-  setHeader(oefeningNaam, "Gewicht per sessie", [
+  const info = OEFENING_EENHEID[oefeningNaam] || { eenheid: 'reps', heeftGewicht: true };
+  const eenheidLabel = info.eenheid === 'sec' ? 'Seconden' : 'Reps';
+
+  setHeader(oefeningNaam, `${eenheidLabel}${info.heeftGewicht ? ' en gewicht' : ''} per sessie`, [
     { label: 'Home', action: () => go('home') },
     { label: 'Progressie', action: () => go('progressie') },
     { label: oefeningNaam, action: () => {} }
@@ -2299,9 +2840,32 @@ function renderProgressieDetail(oefeningNaam) {
     return;
   }
 
+  // Reset naar een zinnige standaard bij het openen van een andere oefening
+  if (progressieWeergave._voorOefening !== oefeningNaam) {
+    progressieWeergave = { toonSets: true, toonGewicht: info.heeftGewicht, periode: 10, _voorOefening: oefeningNaam };
+  }
+
+  const periode = progressieWeergave.periode || 0;
+  const zichtbareData = periode > 0 ? data.slice(-periode) : data;
+
+  const toggleSetsHtml = `
+    <button class="progress-toggle ${progressieWeergave.toonSets ? 'actief' : ''}" onclick="toggleProgressieLaag('toonSets')">${eenheidLabel}</button>
+  `;
+  const toggleGewichtHtml = info.heeftGewicht ? `
+    <button class="progress-toggle ${progressieWeergave.toonGewicht ? 'actief' : ''}" onclick="toggleProgressieLaag('toonGewicht')">Gewicht</button>
+  ` : '';
+
+  const periodeHtml = PROGRESSIE_PERIODE_OPTIES.map(p => `
+    <button class="periode-toggle ${periode === p ? 'actief' : ''}" onclick="zetProgressiePeriode(${p})">${p === 0 ? 'Alles' : `${p}`}</button>
+  `).join('');
+
   app.innerHTML = `
+    <div class="progress-toggle-row">${toggleSetsHtml}${toggleGewichtHtml}</div>
     <div class="chart-card">
-      <div class="chart-sub">Laatste ${data.length} sessies</div>
+      <div class="chart-sub-row">
+        <div class="chart-sub">Laatste ${zichtbareData.length} sessies</div>
+        <div class="periode-toggle-row">${periodeHtml}</div>
+      </div>
       <div class="chart-canvas-wrap"><canvas id="progressChart"></canvas></div>
       <div class="stat-strip" id="statStrip"></div>
     </div>
@@ -2310,9 +2874,26 @@ function renderProgressieDetail(oefeningNaam) {
   tekenChart(oefeningNaam);
 }
 
+function zetProgressiePeriode(p) {
+  progressieWeergave.periode = p;
+  renderProgressieDetail(progressieWeergave._voorOefening);
+}
+
+function toggleProgressieLaag(laag) {
+  // Minstens één laag moet altijd aan blijven staan.
+  const andereLaag = laag === 'toonSets' ? 'toonGewicht' : 'toonSets';
+  if (progressieWeergave[laag] && !progressieWeergave[andereLaag]) return;
+  progressieWeergave[laag] = !progressieWeergave[laag];
+  renderProgressieDetail(progressieWeergave._voorOefening);
+}
+
 function tekenChart(oefeningNaam) {
-  const data = VOORBEELD_HISTORIE[oefeningNaam];
-  if (!data) return;
+  const volledigeData = VOORBEELD_HISTORIE[oefeningNaam];
+  if (!volledigeData) return;
+  const periode = progressieWeergave.periode || 0;
+  const data = periode > 0 ? volledigeData.slice(-periode) : volledigeData;
+  const info = OEFENING_EENHEID[oefeningNaam] || { eenheid: 'reps', heeftGewicht: true };
+  const eenheidLabel = info.eenheid === 'sec' ? 'Seconden' : 'Reps';
 
   const ctx = document.getElementById('progressChart').getContext('2d');
   if (actieveChart) actieveChart.destroy();
@@ -2323,45 +2904,84 @@ function tekenChart(oefeningNaam) {
   const textDim = rootStyles.getPropertyValue('--text-dim').trim();
   const border = rootStyles.getPropertyValue('--border').trim();
 
+  const labels = data.map(d => {
+    const dt = new Date(d.datum);
+    return `${dt.getDate()}/${dt.getMonth() + 1}`;
+  });
+
+  const datasets = [];
+  const scales = {
+    x: { ticks: { color: textDim, font: { family: 'SF Mono', size: 10 } }, grid: { color: border, drawTicks: false } }
+  };
+
+  if (progressieWeergave.toonSets) {
+    datasets.push({
+      type: 'bar',
+      label: eenheidLabel,
+      data: data.map(d => d.topReps),
+      backgroundColor: moss + (progressieWeergave.toonGewicht ? '99' : 'cc'),
+      borderRadius: 4,
+      yAxisID: 'ySets',
+      order: 2
+    });
+    scales.ySets = {
+      position: 'left',
+      ticks: { color: moss, font: { family: 'SF Mono', size: 10 } },
+      grid: { color: border },
+      title: { display: true, text: eenheidLabel, color: moss, font: { family: 'SF Mono', size: 10 } }
+    };
+  }
+
+  if (progressieWeergave.toonGewicht && info.heeftGewicht) {
+    datasets.push({
+      type: 'line',
+      label: 'Gewicht (kg)',
+      data: data.map(d => d.gewicht),
+      borderColor: clay,
+      backgroundColor: clay + '33',
+      pointBackgroundColor: clay,
+      pointRadius: 3,
+      tension: 0.35,
+      fill: progressieWeergave.toonSets ? false : true,
+      borderWidth: 2,
+      yAxisID: 'yGewicht',
+      order: 1
+    });
+    scales.yGewicht = {
+      position: 'right',
+      ticks: { color: clay, font: { family: 'SF Mono', size: 10 } },
+      grid: { drawOnChartArea: !progressieWeergave.toonSets, color: border },
+      title: { display: true, text: 'kg', color: clay, font: { family: 'SF Mono', size: 10 } }
+    };
+  }
+
   actieveChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: data.map(d => {
-        const dt = new Date(d.datum);
-        return `${dt.getDate()}/${dt.getMonth() + 1}`;
-      }),
-      datasets: [{
-        label: 'Gewicht (kg)',
-        data: data.map(d => d.gewicht),
-        borderColor: clay,
-        backgroundColor: clay + '33',
-        pointBackgroundColor: clay,
-        pointRadius: 3,
-        tension: 0.35,
-        fill: true,
-        borderWidth: 2
-      }]
-    },
+    data: { labels, datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ticks: { color: textDim, font: { family: 'SF Mono', size: 10 } }, grid: { color: border, drawTicks: false } },
-        y: { ticks: { color: textDim, font: { family: 'SF Mono', size: 10 } }, grid: { color: border } }
-      }
+      plugins: {
+        legend: {
+          display: datasets.length > 1,
+          labels: { color: textDim, font: { family: 'SF Mono', size: 11 }, boxWidth: 12 }
+        }
+      },
+      scales
     }
   });
 
   const laatste = data[data.length - 1];
   const eerste = data[0];
-  const delta = Math.round((laatste.gewicht - eerste.gewicht) * 100) / 100;
+  const deltaGewicht = Math.round((laatste.gewicht - eerste.gewicht) * 100) / 100;
 
-  document.getElementById('statStrip').innerHTML = `
-    <div class="stat"><div class="v">${laatste.gewicht}kg</div><div class="l">HUIDIG</div></div>
-    <div class="stat"><div class="v">+${delta}kg</div><div class="l">SINDS START</div></div>
-    <div class="stat"><div class="v">${laatste.topReps}</div><div class="l">TOP REPS</div></div>
-  `;
+  const statsHtml = [];
+  if (info.heeftGewicht) {
+    statsHtml.push(`<div class="stat"><div class="v">${laatste.gewicht}kg</div><div class="l">HUIDIG</div></div>`);
+    statsHtml.push(`<div class="stat"><div class="v">+${deltaGewicht}kg</div><div class="l">SINDS START</div></div>`);
+  }
+  statsHtml.push(`<div class="stat"><div class="v">${laatste.topReps}</div><div class="l">TOP ${eenheidLabel.toUpperCase()}</div></div>`);
+
+  document.getElementById('statStrip').innerHTML = statsHtml.join('');
 }
 
 // ============================================================
