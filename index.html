@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Calisthenics Log</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -2133,6 +2133,23 @@ function toggleTimerVisible(key) {
   herteken();
 }
 
+// Eén hergebruikte AudioContext, aangemaakt/ontgrendeld op een echte tik van de gebruiker
+// (bv. de Start-knop van een timer). Safari op iOS staat geluid alleen toe als de context
+// binnen zo'n user-gesture ontstaat — een context die pas ontstaat wanneer de timer afloopt
+// (via setInterval) wordt door Safari geweigerd, ook al probeert 'ie meteen te spelen.
+let gedeeldeAudioCtx = null;
+
+function ontgrendelAudio() {
+  if (gedeeldeAudioCtx) {
+    // Als de context om een andere reden gepauzeerd is geraakt, hervat 'm binnen de gesture.
+    if (gedeeldeAudioCtx.state === 'suspended') gedeeldeAudioCtx.resume();
+    return;
+  }
+  try {
+    gedeeldeAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  } catch (e) { /* geluid niet beschikbaar op dit toestel, geen probleem */ }
+}
+
 function timerStartPause(key) {
   const s = timerState[key];
   if (s.actief) {
@@ -2140,6 +2157,7 @@ function timerStartPause(key) {
     s.actief = false;
   } else {
     if (s.resterend <= 0) return;
+    ontgrendelAudio(); // binnen deze klik — dit is de user-gesture die Safari vereist
     s.actief = true;
     s.intervalId = setInterval(() => {
       s.resterend--;
@@ -2190,9 +2208,10 @@ function updateTimerDisplay(key) {
 
 function timerAfgerond() {
   toast('Tijd voorbij ✓');
-  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200]); // werkt niet op iOS Safari — die ondersteunt deze API niet, geen fix mogelijk
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = gedeeldeAudioCtx;
+    if (!ctx) return; // context is nooit ontgrendeld (bv. timer nooit via Start-knop gestart)
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain); gain.connect(ctx.destination);
@@ -2204,7 +2223,10 @@ function timerAfgerond() {
 }
 
 function herteken() {
-  // Herrendert de huidige logkaart zonder de flow-positie te verliezen
+  // Bewaar eerst wat er al in de huidige kaart is ingevuld, zodat het uitklappen van
+  // een timer of uitleg-blok (die deze functie aanroepen) geen ingevulde reps/gewicht/
+  // RIR/vorm resettten wanneer de kaart hierdoor opnieuw wordt opgebouwd.
+  bewaarHuidigeKaart();
   if (huidigLogDag) renderLogKaart();
 }
 
