@@ -415,6 +415,7 @@
   .nood-optie {
     background: var(--bg-raised);
     border: 1px solid var(--border);
+    border-left: 4px solid var(--moss-bright);
     border-radius: var(--radius-md);
     padding: 14px 16px;
     text-align: left;
@@ -423,6 +424,36 @@
   }
 
   .nood-optie:hover { border-color: var(--moss-bright); }
+
+  /* Kleurgradatie op basis van spiergroep-overlap met eerder gekozen oefeningen:
+     groen = geen overlap (prima combinatie), geel = lichte overlap, oranje/rood = hoge overlap.
+     De rand draagt het hoofdsignaal, het kleine tekstlabel eronder is er voor duidelijkheid. */
+  .nood-optie.overlap-none { border-left-color: var(--moss-bright); }
+  .nood-optie.overlap-moderate { border-left-color: #D9B44A; }
+  .nood-optie.overlap-high { border-left-color: #C1502E; }
+
+  /* De al-gekozen optie blijft altijd goud omlijnd (de bestaande 'gekozen'-stijl),
+     dat wint van de overlap-kleur zodat de selectie duidelijk blijft. */
+  .nood-optie.gekozen { border-left-color: var(--gold); }
+
+  .overlap-badge {
+    display: inline-block;
+    font-family: 'SF Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-top: 6px;
+  }
+
+  .overlap-badge.overlap-moderate-badge {
+    background: rgba(217, 180, 74, 0.2);
+    color: #D9B44A;
+  }
+
+  .overlap-badge.overlap-high-badge {
+    background: rgba(193, 80, 46, 0.24);
+    color: #E08260;
+  }
 
   .nood-optie.gekozen {
     border-color: var(--moss-bright);
@@ -1751,6 +1782,206 @@ const VOORBEELD_HISTORIE = {};
 </script>
 <script>
 // ============================================================
+// EXERCISES — spiergroep-tags per oefening, gebruikt door de noodversie-flow
+// om te bepalen welke spiergroepen al belast zijn door eerdere keuzes.
+//
+// primaryMuscles  = spiergroepen die ZWAAR belast worden door deze oefening
+//                   (de hoofddoelspieren — hierop stapelt je vermoeidheid het snelst)
+// secondaryMuscles = spiergroepen die LICHT/MATIG meewerken (ondersteunend/stabiliserend)
+//
+// Spiergroep-labels (consistent, geen synoniemen):
+// chest, ant_delt, med_delt, rear_delt, serratus, triceps, biceps, forearms,
+// lats, upper_back, traps, core, quads, hamstrings, glutes, calves
+// ============================================================
+
+/**
+ * @typedef {"skill"|"strength"|"hypertrophy"|"legs"} ExerciseCategory
+ *
+ * @typedef {Object} Exercise
+ * @property {string} id - unieke slug, bv. "planche-lean"
+ * @property {string} name - leesbare naam
+ * @property {ExerciseCategory} category
+ * @property {string[]} primaryMuscles - zwaar belaste spiergroepen
+ * @property {string[]} secondaryMuscles - licht/matig belaste spiergroepen
+ */
+
+/** @type {Exercise[]} */
+const EXERCISES = [
+  // ---------- SKILL ----------
+  { id: "planche-lean", name: "Planche lean", category: "skill",
+    primaryMuscles: ["chest", "ant_delt", "serratus"], secondaryMuscles: ["triceps", "core"] },
+  { id: "advanced-tuck-planche", name: "Advanced tuck planche", category: "skill",
+    primaryMuscles: ["chest", "ant_delt", "serratus"], secondaryMuscles: ["triceps", "core", "forearms"] },
+  { id: "tuck-planche", name: "Tuck planche", category: "skill",
+    primaryMuscles: ["chest", "ant_delt", "serratus"], secondaryMuscles: ["triceps", "core", "forearms"] },
+  { id: "advanced-tuck-front-lever", name: "Advanced tuck front lever", category: "skill",
+    primaryMuscles: ["lats", "upper_back", "biceps"], secondaryMuscles: ["forearms", "core", "rear_delt"] },
+  { id: "tuck-front-lever-raises", name: "Tuck front lever raises", category: "skill",
+    primaryMuscles: ["lats", "upper_back", "biceps"], secondaryMuscles: ["forearms", "core", "rear_delt"] },
+  { id: "chest-to-wall-handstand", name: "Chest-to-wall handstand", category: "skill",
+    primaryMuscles: ["ant_delt", "med_delt"], secondaryMuscles: ["triceps", "core", "forearms"] },
+  { id: "kick-up-practice", name: "Kick-up practice", category: "skill",
+    primaryMuscles: ["ant_delt", "med_delt"], secondaryMuscles: ["core", "forearms"] },
+  { id: "handstand-shoulder-shrugs", name: "Handstand shoulder shrugs", category: "skill",
+    primaryMuscles: ["serratus", "traps"], secondaryMuscles: ["ant_delt"] },
+
+  // ---------- STRENGTH ----------
+  { id: "weighted-dips", name: "Weighted dips", category: "strength",
+    primaryMuscles: ["chest", "triceps"], secondaryMuscles: ["ant_delt"] },
+  { id: "weighted-pushups-elevated", name: "Weighted push-ups, voeten verhoogd", category: "strength",
+    primaryMuscles: ["chest", "ant_delt"], secondaryMuscles: ["triceps", "core"] },
+  { id: "weighted-pullups", name: "Weighted pull-ups", category: "strength",
+    primaryMuscles: ["lats", "biceps"], secondaryMuscles: ["upper_back", "forearms"] },
+  { id: "front-lever-rows", name: "Front lever rows", category: "strength",
+    primaryMuscles: ["lats", "upper_back", "biceps"], secondaryMuscles: ["forearms", "core"] },
+  { id: "deficit-pike-pushups", name: "Deficit pike push-ups", category: "strength",
+    primaryMuscles: ["ant_delt", "med_delt", "triceps"], secondaryMuscles: ["chest", "core"] },
+  { id: "archer-pushups", name: "Archer push-ups", category: "strength",
+    primaryMuscles: ["chest", "triceps"], secondaryMuscles: ["ant_delt", "core"] },
+
+  // ---------- HYPERTROPHY ----------
+  { id: "pseudo-planche-pushups", name: "Pseudo planche push-ups", category: "hypertrophy",
+    primaryMuscles: ["chest", "ant_delt"], secondaryMuscles: ["triceps", "core"] },
+  { id: "single-arm-lateral-raise", name: "Single-arm lateral raise", category: "hypertrophy",
+    primaryMuscles: ["med_delt"], secondaryMuscles: ["traps"] },
+  { id: "band-pull-aparts", name: "Band pull-aparts", category: "hypertrophy",
+    primaryMuscles: ["rear_delt", "upper_back"], secondaryMuscles: ["traps"] },
+  { id: "chinups", name: "Chin-ups", category: "hypertrophy",
+    primaryMuscles: ["lats", "biceps"], secondaryMuscles: ["upper_back", "forearms"] },
+  { id: "single-arm-biceps-curl", name: "Single-arm biceps curl", category: "hypertrophy",
+    primaryMuscles: ["biceps"], secondaryMuscles: ["forearms"] },
+  { id: "inverted-rows", name: "Inverted rows", category: "hypertrophy",
+    primaryMuscles: ["upper_back", "lats"], secondaryMuscles: ["biceps", "rear_delt"] },
+  { id: "overhead-triceps-extension", name: "Overhead triceps extension", category: "hypertrophy",
+    primaryMuscles: ["triceps"], secondaryMuscles: [] },
+  { id: "single-arm-hammer-curl", name: "Single-arm hammer curl", category: "hypertrophy",
+    primaryMuscles: ["biceps"], secondaryMuscles: ["forearms"] },
+
+  // ---------- LEGS ----------
+  { id: "bulgarian-split-squat", name: "Bulgarian split squat", category: "legs",
+    primaryMuscles: ["quads", "glutes"], secondaryMuscles: ["hamstrings", "core"] },
+  { id: "single-leg-calf-raise", name: "Single-leg calf raise", category: "legs",
+    primaryMuscles: ["calves"], secondaryMuscles: [] },
+  { id: "single-leg-rdl", name: "Single-leg RDL", category: "legs",
+    primaryMuscles: ["hamstrings", "glutes"], secondaryMuscles: ["core"] },
+  { id: "pistol-progressie", name: "Pistol-progressie", category: "legs",
+    primaryMuscles: ["quads", "glutes"], secondaryMuscles: ["hamstrings", "core"] }
+];
+
+/**
+ * Zoekt de spiergroep-tags van een oefening op naam (case-insensitive, met
+ * gedeeltelijke match) zodat de bestaande NOODVERSIE_KEUZES-objecten — die
+ * geen id-veld hebben — hieraan gekoppeld kunnen worden zonder elk object
+ * handmatig te hoeven aanpassen.
+ * @param {string} naam
+ * @returns {Exercise | null}
+ */
+function vindExerciseData(naam) {
+  if (!naam) return null;
+  const genormaliseerd = naam.toLowerCase();
+  // Eerst een exacte match proberen, dan een "bevat"-match (voor namen met extra
+  // toevoegingen zoals "Deficit pike push-ups (voeten op stoel/bed, handen op boeken)").
+  let gevonden = EXERCISES.find(e => e.name.toLowerCase() === genormaliseerd);
+  if (gevonden) return gevonden;
+  gevonden = EXERCISES.find(e =>
+    genormaliseerd.startsWith(e.name.toLowerCase()) || genormaliseerd.includes(e.name.toLowerCase())
+  );
+  return gevonden || null;
+}
+
+</script>
+<script>
+// ============================================================
+// MUSCLE-OVERLAP FILTER — pure, unit-testbare logica.
+// Geen DOM-toegang, geen globale state-mutatie: alleen input in, nieuwe array uit.
+// ============================================================
+
+/**
+ * @typedef {"none"|"moderate"|"high"} OverlapLevel
+ *
+ * @typedef {Object} HitMuscles
+ * @property {Set<string>} primary   - spiergroepen die in eerdere stappen al ZWAAR
+ *                                      belast zijn (kwamen voor in een primaryMuscles-lijst
+ *                                      van een eerder gekozen oefening)
+ * @property {Set<string>} secondary - spiergroepen die in eerdere stappen al LICHT/MATIG
+ *                                      belast zijn (kwamen voor in een secondaryMuscles-lijst)
+ */
+
+/**
+ * Bepaalt voor elke kandidaat-oefening hoeveel overlap die heeft met wat er in
+ * eerdere stappen van de noodversie-flow al belast is, en sorteert de minst
+ * overlappende opties naar boven. Verbergt nooit iets — dit is puur sortering
+ * plus een label, nooit een blokkade.
+ *
+ * Overlap-niveau van een kandidaat wordt bepaald door zijn EIGEN primaryMuscles
+ * (de spieren die déze oefening zwaar belast) te vergelijken met wat al belast is:
+ *   - "high"     zodra minstens één van de primaryMuscles van de kandidaat al in
+ *                hitMuscles.primary zit (je zou twee keer zwaar op dezelfde
+ *                spiergroep stapelen — de zwaarst mogelijke overlap)
+ *   - "moderate" zodra dat niet zo is, maar minstens één primaryMuscle van de
+ *                kandidaat wel in hitMuscles.secondary zit (die spiergroep werkte
+ *                al licht/matig mee, dus is niet volledig fris meer)
+ *   - "none"     als geen van beide geldt
+ *
+ * @param {Exercise[]} allOptions
+ * @param {HitMuscles} hitMuscles
+ * @returns {(Exercise & { overlapLevel: OverlapLevel })[]} nieuwe array, "none" eerst
+ */
+function getFilteredOptions(allOptions, hitMuscles) {
+  const OVERLAP_VOLGORDE = { none: 0, moderate: 1, high: 2 };
+
+  const metOverlapNiveau = allOptions.map(exercise => {
+    const overlapLevel = bepaalOverlapNiveau(exercise, hitMuscles);
+    return { ...exercise, overlapLevel };
+  });
+
+  // .sort() is in-place op de NIEUWE array uit .map(), dus de input-array
+  // (allOptions) wordt niet gemuteerd — dat hoort bij "pure functie".
+  return metOverlapNiveau.sort((a, b) => OVERLAP_VOLGORDE[a.overlapLevel] - OVERLAP_VOLGORDE[b.overlapLevel]);
+}
+
+/**
+ * @param {Exercise} exercise
+ * @param {HitMuscles} hitMuscles
+ * @returns {OverlapLevel}
+ */
+function bepaalOverlapNiveau(exercise, hitMuscles) {
+  const overlaptMetPrimary = exercise.primaryMuscles.some(spier => hitMuscles.primary.has(spier));
+  if (overlaptMetPrimary) return "high";
+
+  const overlaptMetSecondary = exercise.primaryMuscles.some(spier => hitMuscles.secondary.has(spier));
+  if (overlaptMetSecondary) return "moderate";
+
+  return "none";
+}
+
+/**
+ * Voegt de spiergroepen van een gekozen oefening toe aan de cumulatieve hitMuscles-state.
+ * Geeft een NIEUW HitMuscles-object terug (muteert de input niet), zodat de aanroeper
+ * expliciet kan kiezen om de state bij te werken — dit past bij hoe de rest van de
+ * noodversie-flow (kiesNoodSkill, kiesNoodStrength, ...) al werkt: elke keuze-functie
+ * herschrijft het relevante deel van de noodKeuze-state en rendert opnieuw.
+ *
+ * @param {HitMuscles} hitMuscles
+ * @param {Exercise} gekozenExercise
+ * @returns {HitMuscles}
+ */
+function voegOefeningToeAanHitMuscles(hitMuscles, gekozenExercise) {
+  const nieuwePrimary = new Set(hitMuscles.primary);
+  const nieuweSecondary = new Set(hitMuscles.secondary);
+  gekozenExercise.primaryMuscles.forEach(spier => nieuwePrimary.add(spier));
+  gekozenExercise.secondaryMuscles.forEach(spier => nieuweSecondary.add(spier));
+  return { primary: nieuwePrimary, secondary: nieuweSecondary };
+}
+
+/** @returns {HitMuscles} een lege hitMuscles-state, voor het begin van een nieuwe noodversie-sessie */
+function leegHitMuscles() {
+  return { primary: new Set(), secondary: new Set() };
+}
+
+</script>
+<script>
+// ============================================================
 // APP LOGICA — Clsthenics Log
 // Simpele hash-based routing, geen framework nodig.
 // ============================================================
@@ -1764,7 +1995,7 @@ let ingelogd = false; // placeholder — wordt vervangen door echte Firebase Aut
 let actieveChart = null;
 let huidigLogDag = null;
 let pendingVerlaatHash = null; // welke navigatie wacht op bevestiging via de verlaat-popup
-let noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null }; // gemaakte keuzes voor de noodversie
+let noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null, hitMuscles: leegHitMuscles() }; // gemaakte keuzes voor de noodversie
 let noodKeuzeActief = false; // true zodra het keuzescherm is geopend, tot de sessie eindigt
 let huidigProgressieOefening = ALLE_OEFENINGEN[0];
 
@@ -1868,7 +2099,7 @@ function verlaatPopupOpslaanEnGa() {
   logIndex = 0;
   timerState = {};
   uitlegOpen = {};
-  noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null };
+  noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null, hitMuscles: leegHitMuscles() };
   noodKeuzeActief = false;
   document.getElementById('verlaatPopup').classList.remove('show');
   pendingVerlaatHash = null;
@@ -1884,7 +2115,7 @@ function verlaatPopupZonderOpslaan() {
   logIndex = 0;
   timerState = {};
   uitlegOpen = {};
-  noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null };
+  noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null, hitMuscles: leegHitMuscles() };
   noodKeuzeActief = false;
   document.getElementById('verlaatPopup').classList.remove('show');
   pendingVerlaatHash = null;
@@ -2255,7 +2486,7 @@ function renderLoggen(dagId) {
   if (dag.isNoodtraining) {
     if (!noodKeuzeActief) {
       // Echte nieuwe start (vanuit het dag-overzicht): keuzes leegmaken en de sessie openen.
-      noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null };
+      noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null, hitMuscles: leegHitMuscles() };
       noodKeuzeActief = true;
     }
     const alleKeuzesGemaakt = noodKeuze.skill && noodKeuze.strength && noodKeuze.hypertrophy;
@@ -2692,9 +2923,54 @@ function logAfronden() {
   logIndex = 0;
   timerState = {};
   uitlegOpen = {};
-  noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null };
+  noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null, hitMuscles: leegHitMuscles() };
   noodKeuzeActief = false;
   setTimeout(() => go('trainen/' + dagId), 900);
+}
+
+/**
+ * Geeft de HTML voor het overlap-waarschuwingslabel, of een lege string bij "none"
+ * of wanneer dit de al-gekozen optie zelf is (die staat al duidelijk gemarkeerd via
+ * de 'gekozen'-stijl en hoeft niet ook nog als overlappend met zichzelf getoond te
+ * worden — dat zou verwarrend ogen naast de groene selectie-rand).
+ * @param {OverlapLevel} overlapLevel
+ * @param {boolean} isGekozen
+ * @returns {string}
+ */
+/**
+ * Geeft de HTML voor het overlap-waarschuwingslabel, of een lege string bij "none"
+ * of wanneer dit de al-gekozen optie zelf is (die staat al duidelijk gemarkeerd via
+ * de 'gekozen'-stijl en hoeft niet ook nog als overlappend met zichzelf getoond te
+ * worden — dat zou verwarrend ogen naast de goud omlijnde selectie).
+ * @param {OverlapLevel} overlapLevel
+ * @param {boolean} isGekozen
+ * @returns {string}
+ */
+/**
+ * Geeft de HTML voor het overlap-waarschuwingslabel, of een lege string bij "none".
+ * Dit blijft ook zichtbaar op de al-gekozen optie — die info verdwijnt niet zodra je
+ * een keuze maakt, want de gouden selectie-rand (zie overlapRandKlasse/CSS) blijft
+ * los daarvan het primaire "dit is je keuze"-signaal.
+ * @param {OverlapLevel} overlapLevel
+ * @returns {string}
+ */
+function renderOverlapBadge(overlapLevel) {
+  if (overlapLevel === 'high') return `<div class="overlap-badge overlap-high-badge">hoge overlap</div>`;
+  if (overlapLevel === 'moderate') return `<div class="overlap-badge overlap-moderate-badge">lichte overlap</div>`;
+  return '';
+}
+
+/**
+ * Geeft de CSS-class voor de gekleurde rand van een nood-optie-knop op basis van
+ * overlapLevel (groen/geel/oranje-rood). De 'gekozen'-optie krijgt altijd de goud-
+ * rand van de bestaande selectie-stijl, die wint dus in de CSS van de overlap-kleur.
+ * @param {OverlapLevel} overlapLevel
+ * @returns {string}
+ */
+function overlapRandKlasse(overlapLevel) {
+  if (overlapLevel === 'high') return 'overlap-high';
+  if (overlapLevel === 'moderate') return 'overlap-moderate';
+  return 'overlap-none';
 }
 
 function renderNoodKeuzeScherm(dag) {
@@ -2704,21 +2980,29 @@ function renderNoodKeuzeScherm(dag) {
     { label: 'Loggen', action: () => {} }
   ]);
 
-  const skillOpties = NOODVERSIE_KEUZES.skill.map((o, i) => `
-    <button class="nood-optie ${noodKeuze.skill && noodKeuze.skill.naam === o.naam ? 'gekozen' : ''}" onclick="kiesNoodSkill(${i})">
+  // Stap 1 (skill) is de eerste keuze — er is nog niets belast, dus geen sortering nodig.
+  // Stap 1 (skill) is de eerste keuze — er is nog niets belast, dus altijd 'geen overlap'.
+  const skillOpties = NOODVERSIE_KEUZES.skill.map(o => `
+    <button class="nood-optie overlap-none ${noodKeuze.skill && noodKeuze.skill.naam === o.naam ? 'gekozen' : ''}" onclick="kiesNoodSkill('${o.naam.replace(/'/g, "\\'")}')">
       <div class="nood-optie-dag">${o.dag}</div>
       <div class="nood-optie-naam">${o.naam}</div>
       <div class="nood-optie-target">${o.target}</div>
     </button>
   `).join('');
 
-  const strengthOpties = NOODVERSIE_KEUZES.strength.map((o, i) => `
-    <button class="nood-optie ${noodKeuze.strength && noodKeuze.strength.naam === o.naam ? 'gekozen' : ''}" onclick="kiesNoodStrength(${i})">
+  // Stap 2 (strength) sorteert op overlap met de skill-keuze uit stap 1.
+  const strengthGesorteerd = sorteerNoodOptiesOpOverlap(NOODVERSIE_KEUZES.strength, bouwHitMusclesUit([noodKeuze.skill]));
+  const strengthOpties = strengthGesorteerd.map(o => {
+    const isGekozen = noodKeuze.strength && noodKeuze.strength.naam === o.naam;
+    return `
+    <button class="nood-optie ${overlapRandKlasse(o.overlapLevel)} ${isGekozen ? 'gekozen' : ''}" onclick="kiesNoodStrength('${o.naam.replace(/'/g, "\\'")}')">
       <div class="nood-optie-dag">${o.dag}</div>
       <div class="nood-optie-naam">${o.naam}</div>
       <div class="nood-optie-target">${o.target}${o.gewicht ? ` · ${o.gewicht}kg` : ''}</div>
+      ${renderOverlapBadge(o.overlapLevel)}
     </button>
-  `).join('');
+  `;
+  }).join('');
 
   const dagenMetHypertrophy = Object.keys(NOODVERSIE_KEUZES.hypertrophy);
   const dagKeuzeHtml = dagenMetHypertrophy.map(dagNaam => `
@@ -2727,20 +3011,28 @@ function renderNoodKeuzeScherm(dag) {
     </button>
   `).join('');
 
+  // Stap 3 (hypertrophy) sorteert op overlap met ZOWEL de skill- als de strength-keuze
+  // samen — noodKeuze.hitMuscles is cumulatief, dus dit gebeurt automatisch.
   let hypertrophyOefeningHtml = '';
   if (noodKeuze.hypertrophyDag) {
     const lijst = NOODVERSIE_KEUZES.hypertrophy[noodKeuze.hypertrophyDag];
+    const hypertrophyGesorteerd = sorteerNoodOptiesOpOverlap(lijst, bouwHitMusclesUit([noodKeuze.skill, noodKeuze.strength]));
     hypertrophyOefeningHtml = `
       <div class="nood-substap">
-        ${lijst.map((o, i) => `
-          <button class="nood-optie ${noodKeuze.hypertrophy && noodKeuze.hypertrophy.naam === o.naam ? 'gekozen' : ''}" onclick="kiesNoodHypertrophyOefening(${i})">
+        ${hypertrophyGesorteerd.map(o => {
+          const isGekozen = noodKeuze.hypertrophy && noodKeuze.hypertrophy.naam === o.naam;
+          return `
+          <button class="nood-optie ${overlapRandKlasse(o.overlapLevel)} ${isGekozen ? 'gekozen' : ''}" onclick="kiesNoodHypertrophyOefening('${o.naam.replace(/'/g, "\\'")}')">
             <div class="nood-optie-naam">${o.naam}</div>
             <div class="nood-optie-target">${o.target}${o.gewicht ? ` · ${o.gewicht}kg` : ''}</div>
+            ${renderOverlapBadge(o.overlapLevel)}
           </button>
-        `).join('')}
+        `;
+        }).join('')}
       </div>
     `;
   }
+
 
   const alleKeuzesGemaakt = noodKeuze.skill && noodKeuze.strength && noodKeuze.hypertrophy;
 
@@ -2768,25 +3060,122 @@ function renderNoodKeuzeScherm(dag) {
   `;
 }
 
-function kiesNoodSkill(i) {
-  noodKeuze.skill = NOODVERSIE_KEUZES.skill[i];
+function kiesNoodSkill(naam) {
+  // Nogmaals klikken op de al-gekozen optie vinkt 'm weer af.
+  if (noodKeuze.skill && noodKeuze.skill.naam === naam) {
+    noodKeuze.skill = null;
+  } else {
+    const gekozen = NOODVERSIE_KEUZES.skill.find(o => o.naam === naam);
+    if (!gekozen) return;
+    noodKeuze.skill = gekozen;
+  }
+  herberekenNoodHitMuscles();
   renderNoodKeuzeScherm(huidigLogDag || SCHEMA.dagen.find(d => d.isNoodtraining));
 }
 
-function kiesNoodStrength(i) {
-  noodKeuze.strength = NOODVERSIE_KEUZES.strength[i];
+function kiesNoodStrength(naam) {
+  if (noodKeuze.strength && noodKeuze.strength.naam === naam) {
+    noodKeuze.strength = null;
+  } else {
+    const gekozen = NOODVERSIE_KEUZES.strength.find(o => o.naam === naam);
+    if (!gekozen) return;
+    noodKeuze.strength = gekozen;
+  }
+  herberekenNoodHitMuscles();
   renderNoodKeuzeScherm(huidigLogDag || SCHEMA.dagen.find(d => d.isNoodtraining));
 }
 
 function kiesNoodHypertrophyDag(dagNaam) {
   noodKeuze.hypertrophyDag = dagNaam;
   noodKeuze.hypertrophy = null; // reset de oefening-keuze als de dag wisselt
+  herberekenNoodHitMuscles();
   renderNoodKeuzeScherm(huidigLogDag || SCHEMA.dagen.find(d => d.isNoodtraining));
 }
 
-function kiesNoodHypertrophyOefening(i) {
-  noodKeuze.hypertrophy = NOODVERSIE_KEUZES.hypertrophy[noodKeuze.hypertrophyDag][i];
+function kiesNoodHypertrophyOefening(naam) {
+  if (noodKeuze.hypertrophy && noodKeuze.hypertrophy.naam === naam) {
+    noodKeuze.hypertrophy = null;
+  } else {
+    const gekozen = NOODVERSIE_KEUZES.hypertrophy[noodKeuze.hypertrophyDag].find(o => o.naam === naam);
+    if (!gekozen) return;
+    noodKeuze.hypertrophy = gekozen;
+  }
+  herberekenNoodHitMuscles();
   renderNoodKeuzeScherm(huidigLogDag || SCHEMA.dagen.find(d => d.isNoodtraining));
+}
+
+/**
+ * Herberekent noodKeuze.hitMuscles volledig opnieuw vanuit de huidige (nog actieve)
+ * keuzes, in plaats van cumulatief bij te werken. Dit is nodig omdat een keuze nu
+ * weer afgevinkt kan worden — de spiergroepen van een ingetrokken keuze mogen dan
+ * niet blijven "hangen" in hitMuscles, maar een spiergroep die ook via een ANDERE,
+ * nog actieve keuze belast is moet wel behouden blijven. Simpelweg optellen bij elke
+ * keuze en aftrekken bij het afvinken zou dat tweede geval fout doen; volledig
+ * herberekenen vanuit de resterende keuzes is de robuuste aanpak.
+ */
+/**
+ * Bouwt een HitMuscles-object op uit een subset van de gemaakte keuzes (bv. alleen
+ * skill, of skill+strength). Wordt gebruikt om per stap alleen de ECHT voorgaande
+ * categorieën mee te tellen — nooit de categorie waar je zelf middenin zit, anders
+ * zou een net-gekozen optie zichzelf (en de andere opties in diezelfde stap) als
+ * "hoge overlap" gaan zien.
+ * @param {Array<{naam: string}|null>} keuzes
+ * @returns {HitMuscles}
+ */
+function bouwHitMusclesUit(keuzes) {
+  let hitMuscles = leegHitMuscles();
+  keuzes.forEach(optie => {
+    if (!optie) return;
+    const exerciseData = vindExerciseData(optie.naam);
+    if (!exerciseData) return;
+    hitMuscles = voegOefeningToeAanHitMuscles(hitMuscles, exerciseData);
+  });
+  return hitMuscles;
+}
+
+/**
+ * Werkt noodKeuze.hitMuscles bij tot de VOLLEDIGE cumulatieve stand (skill+strength+
+ * hypertrophy samen). Dit veld wordt niet meer gebruikt om de kleur/badge van losse
+ * stappen te bepalen (dat gebeurt nu per stap met bouwHitMusclesUit, zie
+ * sorteerNoodOptiesOpOverlap) — het blijft wel beschikbaar als totaaloverzicht, mocht
+ * dat later ergens getoond worden.
+ */
+function herberekenNoodHitMuscles() {
+  noodKeuze.hitMuscles = bouwHitMusclesUit([noodKeuze.skill, noodKeuze.strength, noodKeuze.hypertrophy]);
+}
+/**
+ * Combineert een lijst NOODVERSIE_KEUZES-opties (die geen spiergroep-velden hebben)
+ * met hun EXERCISES-tegenhanger, filtert/sorteert op overlap met noodKeuze.hitMuscles,
+ * en geeft de ORIGINELE optie-objecten terug (met naam/target/rust/etc. intact) plus
+ * een toegevoegd overlapLevel-veld — zodat de bestaande render/kies-functies verder
+ * ongewijzigd blijven werken op dezelfde objectvorm.
+ * @param {Array<{naam: string}>} opties
+ * @returns {Array<Object & {overlapLevel: OverlapLevel}>}
+ */
+/**
+ * Berekent per optie het overlapLevel t.o.v. noodKeuze.hitMuscles, maar behoudt de
+ * OORSPRONKELIJKE volgorde van de lijst (geen sortering) — de kaarten mogen niet van
+ * plek wisselen zodra er een keuze wordt gemaakt, alleen de kleur/badge verandert.
+ * @param {Array<{naam: string}>} opties
+ * @returns {Array<Object & {overlapLevel: OverlapLevel}>}
+ */
+/**
+ * Berekent per optie het overlapLevel t.o.v. de gegeven hitMuscles (van ALLEEN de
+ * werkelijk voorgaande stappen — zie bouwHitMusclesUit), maar behoudt de OORSPRONKELIJKE
+ * volgorde van de lijst (geen sortering) — de kaarten mogen niet van plek wisselen
+ * zodra er een keuze wordt gemaakt, alleen de kleur/badge verandert.
+ * @param {Array<{naam: string}>} opties
+ * @param {HitMuscles} hitMuscles
+ * @returns {Array<Object & {overlapLevel: OverlapLevel}>}
+ */
+function sorteerNoodOptiesOpOverlap(opties, hitMuscles) {
+  return opties.map(optie => {
+    const exerciseData = vindExerciseData(optie.naam);
+    // Geen match gevonden -> geen spiergroep-info, dus geen overlap te detecteren.
+    const dummy = exerciseData || { primaryMuscles: [], secondaryMuscles: [] };
+    const overlapLevel = bepaalOverlapNiveau(dummy, hitMuscles);
+    return { ...optie, overlapLevel };
+  });
 }
 
 function renderLoginBox() {
