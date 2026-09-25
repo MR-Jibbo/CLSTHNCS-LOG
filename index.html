@@ -1314,6 +1314,19 @@
   }
 
   /* ===== Login ===== */
+  .login-scherm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+  }
+
+  .login-scherm .login-box {
+    width: 100%;
+    max-width: 360px;
+    margin-top: 0;
+  }
+
   .login-box {
     background: var(--bg-raised);
     border: 1px solid var(--border);
@@ -2087,6 +2100,11 @@ function setHeader(title, sub, crumbs) {
 // ROUTING
 // ============================================================
 function route() {
+  // Niet ingelogd? Dan zie je alleen het loginscherm — ongeacht welke hash er in de
+  // URL staat. Zodra je bent ingelogd, wordt de daadwerkelijk bedoelde pagina getoond
+  // (zie doLogin, die na een geslaagde login route() opnieuw aanroept).
+  if (!ingelogd) return renderLoginScherm();
+
   const hash = window.location.hash.slice(1) || 'home';
   const parts = hash.split('/');
 
@@ -3271,6 +3289,27 @@ function sorteerNoodOptiesOpOverlap(opties, hitMuscles) {
     const overlapLevel = bepaalOverlapNiveau(dummy, hitMuscles);
     return { ...optie, overlapLevel };
   });
+}
+
+/**
+ * Volwaardig loginscherm — dit is de ENIGE pagina die je te zien krijgt zolang je
+ * niet bent ingelogd, ongeacht welke URL/hash je probeert te openen (zie route()).
+ */
+function renderLoginScherm() {
+  setHeader("Inloggen", "Log in om je trainingsschema te bekijken", null);
+  app.innerHTML = `
+    <div class="login-scherm">
+      <div class="login-box">
+        <label class="field-label">E-mail</label>
+        <input type="email" id="loginEmail" placeholder="jij@voorbeeld.nl" onkeydown="if(event.key==='Enter')doLogin()">
+        <label class="field-label">Wachtwoord</label>
+        <input type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="btn primary full" onclick="doLogin()">Inloggen</button>
+        <div class="err" id="loginErr"></div>
+      </div>
+    </div>
+  `;
+  document.getElementById('loginEmail').focus();
 }
 
 function renderLoginBox() {
