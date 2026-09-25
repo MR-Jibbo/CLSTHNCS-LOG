@@ -100,6 +100,38 @@
     }
   }
 
+  /* Handmatige thema-keuze via de knop wint altijd van de systeeminstelling hierboven,
+     ongeacht of het apparaat zelf op licht of donker staat. */
+  html[data-theme="light"] {
+    --bg: #FAF7F0;
+    --bg-raised: #FFFFFF;
+    --bg-raised-2: #F1ECE0;
+    --text: #2A2620;
+    --text-dim: #5C5648;
+    --clay: #9C5F31;
+    --clay-bright: #B4703C;
+    --moss: #4E5F3D;
+    --moss-bright: #3F4E31;
+    --gold: #8A6423;
+    --danger: #A5402B;
+    --border: #D8D0BE;
+  }
+
+  html[data-theme="dark"] {
+    --bg: #211F1A;
+    --bg-raised: #423D33;
+    --bg-raised-2: #4F4939;
+    --text: #FAF7F0;
+    --text-dim: #CFC6B4;
+    --clay: #B47D50;
+    --clay-bright: #D89665;
+    --moss: #7C8C68;
+    --moss-bright: #A0B586;
+    --gold: #E0BC7C;
+    --danger: #D17B65;
+    --border: #6B6350;
+  }
+
   * { box-sizing: border-box; }
 
   html, body {
@@ -133,7 +165,41 @@
     padding: 32px 20px 20px 20px;
     max-width: 640px;
     margin: 0 auto;
+    position: relative;
   }
+
+  .theme-toggle-btn {
+    position: absolute;
+    top: 28px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-raised);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+
+  /* Precies één icoon zichtbaar: welk dat is, hangt af van het EFFECTIEVE thema
+     (handmatige keuze via data-theme, anders de systeeminstelling). */
+  .theme-icon-dark { display: none; }
+  html[data-theme="dark"] .theme-icon-light,
+  html:not([data-theme]) .theme-icon-light { display: none; }
+  html[data-theme="dark"] .theme-icon-dark,
+  html:not([data-theme]) .theme-icon-dark { display: inline; }
+  @media (prefers-color-scheme: light) {
+    html:not([data-theme]) .theme-icon-light { display: inline; }
+    html:not([data-theme]) .theme-icon-dark { display: none; }
+  }
+  html[data-theme="light"] .theme-icon-light { display: inline; }
+  html[data-theme="light"] .theme-icon-dark { display: none; }
 
   header.top .crumb {
     font-family: 'SF Mono', monospace;
@@ -881,6 +947,14 @@
     }
   }
 
+  html[data-theme="light"] select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A6423' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  }
+
+  html[data-theme="dark"] select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E0BC7C' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  }
+
   .field-label {
     font-family: 'SF Mono', monospace;
     font-size: 11px;
@@ -936,6 +1010,28 @@
   .nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
   /* ===== Timer ===== */
+  /* ===== Notitieveld per oefening ===== */
+  .notitie-veld {
+    margin-top: 12px;
+  }
+
+  .notitie-veld textarea {
+    width: 100%;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    resize: vertical;
+    box-sizing: border-box;
+  }
+
+  .notitie-veld textarea::placeholder {
+    color: var(--text-dim);
+  }
+
   /* ===== Uitleg (begin/eind/let op) ===== */
   .uitleg-standalone {
     margin-top: 12px;
@@ -1404,6 +1500,9 @@
 <body>
 
 <header class="top">
+  <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Wissel tussen licht en donker thema">
+    <span class="theme-icon-light">☀</span><span class="theme-icon-dark">☾</span>
+  </button>
   <div class="crumb" id="crumb"></div>
   <h1 id="pageTitle">Jibbe's Calisthenics Log</h1>
   <div class="sub" id="pageSub">Trainingsschema, logging en progressie</div>
@@ -2632,11 +2731,13 @@ function renderLogKaart() {
 
   let kaartHtml = '';
   let uitlegHtml = '';
+  let notitieHtml = '';
   if (item.type === 'warmup' || item.type === 'cooldown') {
     kaartHtml = renderWarmupCooldownKaart(item, logIndex);
   } else {
     kaartHtml = renderOefeningKaart(item, logIndex);
     uitlegHtml = renderUitlegBlock(item.naam, logIndex);
+    notitieHtml = renderNotitieVeld(logIndex);
   }
 
   app.innerHTML = `
@@ -2649,6 +2750,23 @@ function renderLogKaart() {
         : `<button class="btn primary nav-btn" onclick="logVolgende()">Volgende →</button>`}
     </div>
     ${uitlegHtml}
+    ${notitieHtml}
+  `;
+}
+
+/**
+ * Vrij tekstveld onder de "Meer uitleg"-knop waar je per oefening iets kunt
+ * noteren over hoe de set ging (bv. "voelde zwaar", "vorm werd slordig bij set 3").
+ * Waarde wordt net als reps/gewicht/RIR bewaard in bewaarHuidigeKaart() en gaat
+ * mee als los veld naar Firestore.
+ */
+function renderNotitieVeld(idx) {
+  const bewaardeNotitie = (logData[idx] && logData[idx].notitie) || '';
+  return `
+    <div class="notitie-veld">
+      <label class="field-label" for="notitie_${idx}">Notitie</label>
+      <textarea id="notitie_${idx}" placeholder="Hoe ging deze oefening? (optioneel)" rows="2">${bewaardeNotitie}</textarea>
+    </div>
   `;
 }
 
@@ -2974,10 +3092,12 @@ function bewaarHuidigeKaart() {
   }
   const rirEl = document.getElementById('rir_sel');
   const vormEl = document.getElementById('vorm_sel');
+  const notitieEl = document.getElementById(`notitie_${logIndex}`);
   logData[logIndex] = {
     sets,
     rir: rirEl ? rirEl.value : null,
-    vorm: vormEl ? vormEl.value : null
+    vorm: vormEl ? vormEl.value : null,
+    notitie: notitieEl ? notitieEl.value : ''
   };
 }
 
@@ -3042,7 +3162,8 @@ function slaLogDataOpInFirestore(dag, oefeningen, data) {
       oefeningType: item.type,
       sets: setsArray,
       rir: ingevuld.rir,
-      vorm: ingevuld.vorm
+      vorm: ingevuld.vorm,
+      notitie: ingevuld.notitie || ''
     }));
   });
   return Promise.all(schrijfacties);
@@ -3643,6 +3764,39 @@ function tekenChart(oefeningNaam) {
 
   document.getElementById('statStrip').innerHTML = statsHtml.join('');
 }
+
+// ============================================================
+// THEMA — handmatige licht/donker-keuze, overschrijft de systeeminstelling.
+// Wordt onthouden in localStorage zodat de keuze blijft staan bij een volgend bezoek.
+// ============================================================
+function pasThemaToe(thema) {
+  if (thema === 'light' || thema === 'dark') {
+    document.documentElement.setAttribute('data-theme', thema);
+  } else {
+    document.documentElement.removeAttribute('data-theme'); // volg systeeminstelling
+  }
+}
+
+function toggleTheme() {
+  const huidig = document.documentElement.getAttribute('data-theme');
+  const stelselDonker = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const huidigEffectief = huidig || (stelselDonker ? 'dark' : 'light');
+  const nieuw = huidigEffectief === 'dark' ? 'light' : 'dark';
+  pasThemaToe(nieuw);
+  try { localStorage.setItem('thema', nieuw); } catch (e) { /* localStorage niet beschikbaar, geen probleem */ }
+  // Zelfde aanpak als herteken(): eerst een eventuele ingevulde logging-kaart bewaren
+  // (anders resetten reps/gewicht/notitie), dan de huidige pagina opnieuw renderen.
+  // route() werkt op elke pagina, niet alleen de logging-flow zoals herteken() dat doet.
+  if (huidigLogDag) bewaarHuidigeKaart();
+  route();
+}
+
+// Opgeslagen voorkeur meteen toepassen, vóór de eerste render — voorkomt een
+// zichtbare flits van het verkeerde thema bij het laden van de pagina.
+try {
+  const opgeslagenThema = localStorage.getItem('thema');
+  if (opgeslagenThema) pasThemaToe(opgeslagenThema);
+} catch (e) { /* localStorage niet beschikbaar, systeeminstelling blijft gelden */ }
 
 // ============================================================
 // INIT
