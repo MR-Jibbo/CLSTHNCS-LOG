@@ -5,6 +5,58 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Calisthenics Log</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script type="module">
+  // Firebase — modulaire SDK via CDN, geen build-stap nodig.
+  // Functies worden op window gehangen zodat het niet-module app.js ze kan aanroepen.
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import {
+    getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  import {
+    getFirestore, collection, addDoc, query, where, orderBy, getDocs, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCVqFc5bCk_zTEfpMk7fzZZcu2HodMTCzA",
+    authDomain: "clsthenics-log.firebaseapp.com",
+    projectId: "clsthenics-log",
+    storageBucket: "clsthenics-log.firebasestorage.app",
+    messagingSenderId: "297564612866",
+    appId: "1:297564612866:web:0b815d6283c0b34de67a1b"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  window.firebaseAuth = {
+    signIn: (email, wachtwoord) => signInWithEmailAndPassword(auth, email, wachtwoord),
+    signOut: () => signOut(auth),
+    onChange: (callback) => onAuthStateChanged(auth, callback),
+    huidigeUser: () => auth.currentUser
+  };
+
+  window.firebaseDb = {
+    voegLogToe: (data) => addDoc(collection(db, "logs"), { ...data, aangemaaktOp: serverTimestamp() }),
+    haalLogsOp: async (oefeningNaam) => {
+      const q = query(
+        collection(db, "logs"),
+        where("oefeningNaam", "==", oefeningNaam),
+        orderBy("aangemaaktOp", "asc")
+      );
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    },
+    haalAlleLogsOp: async () => {
+      const q = query(collection(db, "logs"), orderBy("aangemaaktOp", "asc"));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+  };
+
+  // Meldt app.js dat Firebase klaar is, voor het geval de rest van de pagina daarop wacht.
+  window.dispatchEvent(new Event('firebase-klaar'));
+</script>
 <style>
   :root {
     /* Donker thema (standaard) — contrast opgehoogd t.o.v. eerdere versie */
@@ -1676,7 +1728,10 @@ const SCHEMA = {
       isNoodtraining: true,
       opmerking: "Dit onderhoudt, het bouwt niet op. Uitzondering, geen gewoonte.",
       warmup: [
-        { naam: "Korte warm-up", sec: 300 }
+        { naam: "Jumping jacks", sec: 60 },
+        { naam: "Arm circles", sec: 45 },
+        { naam: "Polsroutine (cirkels, palm rocks)", sec: 60 },
+        { naam: "Scapular pull-ups / push-ups", target: "2×10" }
       ],
       skill: {
         naam: "Onderhoud — kies bij het loggen je skill-hold",
@@ -1692,7 +1747,9 @@ const SCHEMA = {
       ],
       legs: [],
       cooldown: [
-        { naam: "Korte cooldown", sec: 180 }
+        { naam: "Borststretch deurpost", sec: 30 },
+        { naam: "Lat/schouderstretch", sec: 30 },
+        { naam: "Pols flexor/extensor", sec: 30 }
       ]
     }
   ]
@@ -2089,10 +2146,10 @@ function sluitVerlaatPopup() {
 
 function verlaatPopupOpslaanEnGa() {
   bewaarHuidigeKaart();
-  // Placeholder: hier schrijft straks de Firestore-koppeling logData daadwerkelijk weg.
-  // Tot die tijd bewaren we wat is ingevuld net als de normale 'Afronden'-knop dat doet.
   Object.values(timerState).forEach(s => { if (s.intervalId) clearInterval(s.intervalId); });
-  toast('Voortgang opgeslagen ✓');
+  slaLogDataOpInFirestore(huidigLogDag, logOefeningen, logData)
+    .then(() => toast('Voortgang opgeslagen ✓'))
+    .catch(() => toast('Opslaan mislukt — check je internetverbinding'));
   const doel = pendingVerlaatHash;
   huidigLogDag = null;
   logData = {};
@@ -2913,11 +2970,12 @@ function logVorige() {
 
 function logAfronden() {
   bewaarHuidigeKaart();
-  // Placeholder: hier komt straks de Firestore write met logData.
   // Actieve timers stoppen zodat er geen lopende intervals achterblijven.
   Object.values(timerState).forEach(s => { if (s.intervalId) clearInterval(s.intervalId); });
-  toast('Training opgeslagen ✓');
   const dagId = huidigLogDag.id;
+  slaLogDataOpInFirestore(huidigLogDag, logOefeningen, logData)
+    .then(() => toast('Training opgeslagen ✓'))
+    .catch(() => toast('Opslaan mislukt — check je internetverbinding'));
   huidigLogDag = null;
   logData = {};
   logIndex = 0;
@@ -2926,6 +2984,43 @@ function logAfronden() {
   noodKeuze = { skill: null, strength: null, hypertrophyDag: null, hypertrophy: null, hitMuscles: leegHitMuscles() };
   noodKeuzeActief = false;
   setTimeout(() => go('trainen/' + dagId), 900);
+}
+
+/**
+ * Schrijft elke gelogde oefening als los document naar de Firestore-collectie "logs".
+ * Eén document per oefening (niet per hele training) zodat de progressie-pagina
+ * makkelijk kan filteren op oefeningNaam zonder door geneste sets te hoeven zoeken.
+ * @param {Object} dag - het dag-object (voor dagId/dagNaam op elk document)
+ * @param {Array} oefeningen - logOefeningen: de kaarten van de sessie
+ * @param {Object} data - logData: per kaart-index de ingevulde sets/rir/vorm
+ * @returns {Promise}
+ */
+function slaLogDataOpInFirestore(dag, oefeningen, data) {
+  if (!window.firebaseDb || !window.firebaseAuth || !window.firebaseAuth.huidigeUser()) {
+    return Promise.reject(new Error('Niet ingelogd of Firebase niet geladen'));
+  }
+  const schrijfacties = [];
+  oefeningen.forEach((item, idx) => {
+    if (item.type === 'warmup' || item.type === 'cooldown') return; // geen sets, niets op te slaan
+    const ingevuld = data[idx];
+    if (!ingevuld) return; // deze kaart is nooit bezocht/ingevuld
+    const setsArray = Object.keys(ingevuld.sets || {}).map(setNr => ({
+      set: parseInt(setNr),
+      reps: ingevuld.sets[setNr].reps,
+      gewicht: ingevuld.sets[setNr].gewicht
+    }));
+    if (setsArray.length === 0) return;
+    schrijfacties.push(window.firebaseDb.voegLogToe({
+      dagId: dag.id,
+      dagNaam: dag.naam,
+      oefeningNaam: item.naam,
+      oefeningType: item.type,
+      sets: setsArray,
+      rir: ingevuld.rir,
+      vorm: ingevuld.vorm
+    }));
+  });
+  return Promise.all(schrijfacties);
 }
 
 /**
@@ -3192,10 +3287,42 @@ function renderLoginBox() {
 }
 
 function doLogin() {
-  // Placeholder: hier komt straks Firebase Auth signInWithEmailAndPassword.
-  ingelogd = true;
-  toast('Ingelogd ✓');
-  route();
+  const email = document.getElementById('loginEmail').value;
+  const wachtwoord = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginErr');
+  errEl.textContent = '';
+
+  if (!window.firebaseAuth) {
+    errEl.textContent = 'Even geduld, Firebase laadt nog...';
+    return;
+  }
+
+  window.firebaseAuth.signIn(email, wachtwoord)
+    .then(() => {
+      ingelogd = true;
+      toast('Ingelogd ✓');
+      route();
+    })
+    .catch((error) => {
+      errEl.textContent = vertaalAuthFout(error.code);
+    });
+}
+
+/**
+ * Vertaalt Firebase Auth-foutcodes naar begrijpelijke Nederlandse tekst,
+ * zodat je niet met een kale "auth/invalid-credential" blijft zitten.
+ * @param {string} code
+ * @returns {string}
+ */
+function vertaalAuthFout(code) {
+  const meldingen = {
+    'auth/invalid-email': 'Ongeldig e-mailadres.',
+    'auth/user-not-found': 'Geen account gevonden met dit e-mailadres.',
+    'auth/wrong-password': 'Wachtwoord klopt niet.',
+    'auth/invalid-credential': 'E-mailadres of wachtwoord klopt niet.',
+    'auth/too-many-requests': 'Te veel pogingen, probeer het straks opnieuw.'
+  };
+  return meldingen[code] || 'Inloggen mislukt, probeer het opnieuw.';
 }
 
 // ============================================================
@@ -3207,20 +3334,53 @@ function renderProgressieOverzicht() {
     { label: 'Progressie', action: () => {} }
   ]);
 
-  const tegels = ALLE_OEFENINGEN.map(naam => {
-    const data = VOORBEELD_HISTORIE[naam];
-    const heeftData = data && data.length;
-    const laatste = heeftData ? data[data.length - 1] : null;
-    return `
+  app.innerHTML = `<div class="progress-tile-grid"><div class="empty-progress"><div class="empty-progress-title">Laden…</div></div></div>`;
+
+  haalLaatsteWaardePerOefeningOp().then(laatsteWaarden => {
+    if (window.location.hash !== '#progressie') return; // ondertussen weggenavigeerd
+
+    const tegels = ALLE_OEFENINGEN.map(naam => {
+      const laatste = laatsteWaarden[naam];
+      return `
+        <button class="progress-tile" onclick="go('progressie/${encodeURIComponent(naam)}')">
+          <div class="pt-naam">${naam}</div>
+          <div class="pt-sub">${laatste ? `${laatste.gewicht}kg · laatste sessie` : 'Nog geen logs'}</div>
+          <span class="pt-arrow">→</span>
+        </button>
+      `;
+    }).join('');
+
+    app.innerHTML = `<div class="progress-tile-grid">${tegels}</div>`;
+  }).catch((fout) => {
+    console.error('Progressie-overzicht laden mislukt:', fout);
+    if (window.location.hash !== '#progressie') return;
+    const tegels = ALLE_OEFENINGEN.map(naam => `
       <button class="progress-tile" onclick="go('progressie/${encodeURIComponent(naam)}')">
         <div class="pt-naam">${naam}</div>
-        <div class="pt-sub">${heeftData ? `${laatste.gewicht}kg · laatste sessie` : 'Nog geen logs'}</div>
+        <div class="pt-sub">Nog geen logs</div>
         <span class="pt-arrow">→</span>
       </button>
-    `;
-  }).join('');
+    `).join('');
+    app.innerHTML = `<div class="progress-tile-grid">${tegels}</div>`;
+  });
+}
 
-  app.innerHTML = `<div class="progress-tile-grid">${tegels}</div>`;
+/**
+ * Haalt in ÉÉN Firestore-call alle logs van de gebruiker op en groepeert ze
+ * client-side per oefeningnaam, zodat het overzicht niet voor elke tegel een
+ * losse query hoeft te doen. Geeft per oefening alleen het laatste (meest
+ * recente) datapunt terug, wat is wat het overzicht nodig heeft.
+ * @returns {Promise<Object<string, {gewicht: number}>>}
+ */
+async function haalLaatsteWaardePerOefeningOp() {
+  if (!window.firebaseDb || !window.firebaseAuth || !window.firebaseAuth.huidigeUser()) return {};
+  const logs = await window.firebaseDb.haalAlleLogsOp(); // al gesorteerd oud → nieuw
+  const laatste = {};
+  logs.forEach(log => {
+    const maxGewicht = Math.max(0, ...(log.sets || []).map(s => parseFloat(s.gewicht) || 0));
+    laatste[log.oefeningNaam] = { gewicht: maxGewicht }; // latere logs overschrijven eerdere, dus dit blijft de meest recente
+  });
+  return laatste;
 }
 
 let progressieWeergave = { toonSets: true, toonGewicht: true, periode: 10 }; // welke lagen/periode actief zijn per oefening-pagina
@@ -3236,53 +3396,96 @@ function renderProgressieDetail(oefeningNaam) {
     { label: oefeningNaam, action: () => {} }
   ]);
 
-  const data = VOORBEELD_HISTORIE[oefeningNaam];
-  const heeftData = data && data.length > 0;
+  app.innerHTML = `<div class="chart-card"><div class="empty-progress"><div class="empty-progress-title">Laden…</div></div></div>`;
 
-  if (!heeftData) {
-    app.innerHTML = `
-      <div class="chart-card">
-        <div class="empty-progress">
-          <div class="empty-progress-title">Nog geen logs</div>
-          <div class="empty-progress-sub">Zodra je deze oefening logt tijdens een training, verschijnt hier je progressie over tijd.</div>
+  haalProgressieDataOp(oefeningNaam).then(data => {
+    // De gebruiker kan intussen naar een andere pagina genavigeerd zijn — dan niet meer tonen.
+    if (window.location.hash !== `#progressie/${encodeURIComponent(oefeningNaam)}`) return;
+
+    VOORBEELD_HISTORIE[oefeningNaam] = data; // tekenChart leest hieruit, zie verderop
+    const heeftData = data && data.length > 0;
+
+    if (!heeftData) {
+      app.innerHTML = `
+        <div class="chart-card">
+          <div class="empty-progress">
+            <div class="empty-progress-title">Nog geen logs</div>
+            <div class="empty-progress-sub">Zodra je deze oefening logt tijdens een training, verschijnt hier je progressie over tijd.</div>
+          </div>
         </div>
+      `;
+      return;
+    }
+
+    // Reset naar een zinnige standaard bij het openen van een andere oefening
+    if (progressieWeergave._voorOefening !== oefeningNaam) {
+      progressieWeergave = { toonSets: true, toonGewicht: info.heeftGewicht, periode: 10, _voorOefening: oefeningNaam };
+    }
+
+    const periode = progressieWeergave.periode || 0;
+    const zichtbareData = periode > 0 ? data.slice(-periode) : data;
+
+    const toggleSetsHtml = `
+      <button class="progress-toggle ${progressieWeergave.toonSets ? 'actief' : ''}" onclick="toggleProgressieLaag('toonSets')">${eenheidLabel}</button>
+    `;
+    const toggleGewichtHtml = info.heeftGewicht ? `
+      <button class="progress-toggle ${progressieWeergave.toonGewicht ? 'actief' : ''}" onclick="toggleProgressieLaag('toonGewicht')">Gewicht</button>
+    ` : '';
+
+    const periodeHtml = PROGRESSIE_PERIODE_OPTIES.map(p => `
+      <button class="periode-toggle ${periode === p ? 'actief' : ''}" onclick="zetProgressiePeriode(${p})">${p === 0 ? 'Alles' : `${p}`}</button>
+    `).join('');
+
+    app.innerHTML = `
+      <div class="progress-toggle-row">${toggleSetsHtml}${toggleGewichtHtml}</div>
+      <div class="chart-card">
+        <div class="chart-sub-row">
+          <div class="chart-sub">Laatste ${zichtbareData.length} sessies</div>
+          <div class="periode-toggle-row">${periodeHtml}</div>
+        </div>
+        <div class="chart-canvas-wrap"><canvas id="progressChart"></canvas></div>
+        <div class="stat-strip" id="statStrip"></div>
       </div>
     `;
-    return;
-  }
 
-  // Reset naar een zinnige standaard bij het openen van een andere oefening
-  if (progressieWeergave._voorOefening !== oefeningNaam) {
-    progressieWeergave = { toonSets: true, toonGewicht: info.heeftGewicht, periode: 10, _voorOefening: oefeningNaam };
-  }
+    tekenChart(oefeningNaam);
+  }).catch((fout) => {
+    console.error('Progressie-detail laden mislukt:', fout);
+    if (window.location.hash !== `#progressie/${encodeURIComponent(oefeningNaam)}`) return;
+    app.innerHTML = `<div class="chart-card"><div class="empty-progress"><div class="empty-progress-title">Kon logs niet laden</div><div class="empty-progress-sub">Check je internetverbinding en probeer het opnieuw.</div></div></div>`;
+  });
+}
 
-  const periode = progressieWeergave.periode || 0;
-  const zichtbareData = periode > 0 ? data.slice(-periode) : data;
+/**
+ * Haalt alle Firestore-logs van één oefening op en zet ze om naar de vorm die
+ * tekenChart al verwacht: één punt per SESSIE (dag), met het HOOGSTE gewicht en de
+ * meeste reps/seconden van die dag (de "topset"), gesorteerd oud → nieuw.
+ * @param {string} oefeningNaam
+ * @returns {Promise<Array<{datum: string, gewicht: number, topReps: number}>>}
+ */
+async function haalProgressieDataOp(oefeningNaam) {
+  if (!window.firebaseDb || !window.firebaseAuth || !window.firebaseAuth.huidigeUser()) return [];
+  const logs = await window.firebaseDb.haalLogsOp(oefeningNaam);
 
-  const toggleSetsHtml = `
-    <button class="progress-toggle ${progressieWeergave.toonSets ? 'actief' : ''}" onclick="toggleProgressieLaag('toonSets')">${eenheidLabel}</button>
-  `;
-  const toggleGewichtHtml = info.heeftGewicht ? `
-    <button class="progress-toggle ${progressieWeergave.toonGewicht ? 'actief' : ''}" onclick="toggleProgressieLaag('toonGewicht')">Gewicht</button>
-  ` : '';
+  // Groepeer per dag (yyyy-mm-dd), want er kunnen meerdere sets/documenten per sessie zijn.
+  const perDag = {};
+  logs.forEach(log => {
+    if (!log.aangemaaktOp || !log.aangemaaktOp.toDate) return; // serverTimestamp nog niet uitgeschreven
+    const datum = log.aangemaaktOp.toDate().toISOString().slice(0, 10);
+    if (!perDag[datum]) perDag[datum] = { maxGewicht: 0, maxReps: 0 };
+    (log.sets || []).forEach(set => {
+      const reps = parseFloat(set.reps) || 0;
+      const gewicht = parseFloat(set.gewicht) || 0;
+      if (reps > perDag[datum].maxReps) perDag[datum].maxReps = reps;
+      if (gewicht > perDag[datum].maxGewicht) perDag[datum].maxGewicht = gewicht;
+    });
+  });
 
-  const periodeHtml = PROGRESSIE_PERIODE_OPTIES.map(p => `
-    <button class="periode-toggle ${periode === p ? 'actief' : ''}" onclick="zetProgressiePeriode(${p})">${p === 0 ? 'Alles' : `${p}`}</button>
-  `).join('');
-
-  app.innerHTML = `
-    <div class="progress-toggle-row">${toggleSetsHtml}${toggleGewichtHtml}</div>
-    <div class="chart-card">
-      <div class="chart-sub-row">
-        <div class="chart-sub">Laatste ${zichtbareData.length} sessies</div>
-        <div class="periode-toggle-row">${periodeHtml}</div>
-      </div>
-      <div class="chart-canvas-wrap"><canvas id="progressChart"></canvas></div>
-      <div class="stat-strip" id="statStrip"></div>
-    </div>
-  `;
-
-  tekenChart(oefeningNaam);
+  return Object.keys(perDag).sort().map(datum => ({
+    datum,
+    gewicht: perDag[datum].maxGewicht,
+    topReps: perDag[datum].maxReps
+  }));
 }
 
 function zetProgressiePeriode(p) {
@@ -3398,7 +3601,29 @@ function tekenChart(oefeningNaam) {
 // ============================================================
 // INIT
 // ============================================================
+
+// Houdt `ingelogd` synchroon met de echte Firebase Auth-status — dit vangt ook het
+// geval af waarin iemand de pagina herlaadt terwijl Firebase de sessie nog onthoudt
+// (Firebase Auth blijft standaard ingelogd tussen bezoeken), en het geval waarin de
+// sessie serverside verlopen is.
+// Toont de app meteen (knoppen/navigatie werken los van Firebase). Zodra Firebase
+// geladen is, wordt de auth-status gekoppeld — maar de eerste render wacht daar
+// NIET op, anders blijft de hele pagina leeg zodra Firebase traag laadt of om wat
+// voor reden dan ook niet beschikbaar is (netwerk, adblocker, CDN-storing).
 route();
+
+function koppelFirebaseAuthZodraBeschikbaar() {
+  if (!window.firebaseAuth) {
+    setTimeout(koppelFirebaseAuthZodraBeschikbaar, 50);
+    return;
+  }
+  window.firebaseAuth.onChange((user) => {
+    const wasIngelogd = ingelogd;
+    ingelogd = !!user;
+    if (wasIngelogd !== ingelogd) route(); // alleen opnieuw renderen bij een echte statuswijziging
+  });
+}
+koppelFirebaseAuthZodraBeschikbaar();
 
 </script>
 </body>
