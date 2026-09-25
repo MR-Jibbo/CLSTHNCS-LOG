@@ -2291,6 +2291,7 @@ function sluitVerlaatPopup() {
 
 function verlaatPopupOpslaanEnGa() {
   bewaarHuidigeKaart();
+  geefWakeLockVrij();
   Object.values(timerState).forEach(s => { if (s.intervalId) clearInterval(s.intervalId); });
   slaLogDataOpInFirestore(huidigLogDag, logOefeningen, logData)
     .then(() => toast('Voortgang opgeslagen ✓'))
@@ -2310,6 +2311,7 @@ function verlaatPopupOpslaanEnGa() {
 }
 
 function verlaatPopupZonderOpslaan() {
+  geefWakeLockVrij();
   Object.values(timerState).forEach(s => { if (s.intervalId) clearInterval(s.intervalId); });
   const doel = pendingVerlaatHash;
   huidigLogDag = null;
@@ -2734,6 +2736,7 @@ function renderLoggen(dagId) {
 }
 
 function renderLogKaart() {
+  vraagWakeLockAan(); // scherm blijft aan zolang je aan het loggen bent
   const item = logOefeningen[logIndex];
   const totaal = logOefeningen.length;
   const isLaatste = logIndex === totaal - 1;
@@ -3205,6 +3208,7 @@ function logVorige() {
 
 function logAfronden() {
   bewaarHuidigeKaart();
+  geefWakeLockVrij();
   // Actieve timers stoppen zodat er geen lopende intervals achterblijven.
   Object.values(timerState).forEach(s => { if (s.intervalId) clearInterval(s.intervalId); });
   const dagId = huidigLogDag.id;
@@ -3854,6 +3858,41 @@ function tekenChart(oefeningNaam) {
 
   document.getElementById('statStrip').innerHTML = statsHtml.join('');
 }
+
+// ============================================================
+// WAKE LOCK — houdt het scherm actief tijdens het loggen van een training, zodat
+// de telefoon niet vanzelf vergrendelt terwijl je aan het trainen bent. Wordt
+// alleen geactiveerd tijdens een logging-sessie, niet overal in de app.
+// ============================================================
+let wakeLockSentinel = null;
+
+/**
+ * Vraagt een wake lock aan (scherm blijft aan). Faalt stil als de browser het
+ * niet ondersteunt (bv. oudere Safari) of als de aanvraag om een andere reden
+ * mislukt — de app blijft dan gewoon normaal werken, alleen zonder deze functie.
+ */
+async function vraagWakeLockAan() {
+  if (!('wakeLock' in navigator)) return; // niet ondersteund door deze browser
+  try {
+    wakeLockSentinel = await navigator.wakeLock.request('screen');
+  } catch (e) { /* geweigerd of niet beschikbaar, geen probleem */ }
+}
+
+function geefWakeLockVrij() {
+  if (wakeLockSentinel) {
+    wakeLockSentinel.release().catch(() => {});
+    wakeLockSentinel = null;
+  }
+}
+
+// Browsers geven een wake lock automatisch vrij zodra het tabblad naar de
+// achtergrond gaat (schermvergrendeling, van app wisselen). Zodra je terugkomt
+// tijdens een lopende logging-sessie, vraagt dit 'm automatisch opnieuw aan.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && huidigLogDag) {
+    vraagWakeLockAan();
+  }
+});
 
 // ============================================================
 // THEMA — handmatige licht/donker-keuze, overschrijft de systeeminstelling.
