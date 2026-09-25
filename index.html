@@ -912,6 +912,27 @@
     padding: 2px 10px;
     border-radius: 4px;
     text-align: center;
+    cursor: pointer;
+  }
+
+  .handmatige-invoer {
+    font-family: 'SF Mono', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--bg-raised-2);
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    padding: 2px 6px;
+    text-align: center;
+    width: 52px;
+    -moz-appearance: textfield;
+  }
+
+  .handmatige-invoer::-webkit-outer-spin-button,
+  .handmatige-invoer::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 
   .draaiwiel-eenheid {
@@ -2395,7 +2416,6 @@ function renderDagDetail(dagId) {
         <div class="ex-row">
           <div class="ex-name">${o.naam}</div>
           <div class="ex-specs"><span><b>${o.target}</b></span>${o.rust !== '—' ? `<span>rust ${o.rust}</span>` : ''}</div>
-          ${o.focus ? `<div class="ex-focus">${o.focus}</div>` : ''}
           ${o.progressie ? `<div class="ex-progressie">↗ ${o.progressie}</div>` : ''}
         </div>
       `).join('')}
@@ -2887,10 +2907,78 @@ function renderDraaiwiel(id, waarde, max, eenheid, richting, stap) {
         <div class="lineaal-fade lineaal-fade-l"></div>
         <div class="lineaal-fade lineaal-fade-r"></div>
       </div>
-      <div class="draaiwiel-waarde"><span id="val_${id}">${veilig}</span></div>
+      <div class="draaiwiel-waarde" id="waardeWrap_${id}" onclick="toonHandmatigeInvoer('${id}')">
+        <span id="val_${id}">${veilig}</span>
+      </div>
       <input type="hidden" id="${id}" value="${veilig}">
     </div>
   `;
+}
+
+/**
+ * Vervangt het klikbare cijfer-vakje door een numeriek invoerveld, zodat je een
+ * waarde ook handmatig kunt typen in plaats van alleen te slepen. inputmode
+ * "decimal" (bij niet-hele stappen, zoals gewicht in stappen van 0.5) of "numeric"
+ * (bij hele stappen, reps/seconden) zorgt dat mobiele toestellen het numerieke
+ * numpad tonen in plaats van het volledige toetsenbord.
+ * @param {string} id
+ */
+function toonHandmatigeInvoer(id) {
+  const strook = document.getElementById(`strook_${id}`);
+  const wrap = document.getElementById(`waardeWrap_${id}`);
+  if (!strook || !wrap) return;
+  const huidigeWaarde = strook.dataset.value;
+  const stap = parseFloat(strook.dataset.stap) || 1;
+  const isDecimaal = stap < 1;
+
+  wrap.innerHTML = `
+    <input
+      type="number"
+      inputmode="${isDecimaal ? 'decimal' : 'numeric'}"
+      id="invoer_${id}"
+      class="handmatige-invoer"
+      value="${huidigeWaarde}"
+      step="${stap}"
+      onblur="verwerkHandmatigeInvoer('${id}')"
+      onkeydown="if(event.key==='Enter'){event.target.blur();}"
+    >
+  `;
+  const invoerEl = document.getElementById(`invoer_${id}`);
+  invoerEl.focus();
+  invoerEl.select();
+}
+
+/**
+ * Leest de handmatig getypte waarde, snapt 'm netjes vast op de lineaal (zelfde
+ * update-pad als slepen), en bouwt het waarde-vakje weer terug naar de normale
+ * klikbare weergave.
+ * @param {string} id
+ */
+function verwerkHandmatigeInvoer(id) {
+  const invoerEl = document.getElementById(`invoer_${id}`);
+  if (!invoerEl) return; // al opnieuw gerenderd (bv. door snel wisselen van kaart)
+  const nieuweWaarde = parseFloat(invoerEl.value);
+  draaiwielSnapNaarWaarde(id, isNaN(nieuweWaarde) ? 0 : nieuweWaarde);
+}
+
+/**
+ * Bouwt het waarde-vakje terug naar de normale (klikbare) weergave, en snapt de
+ * gegeven waarde vast op de dichtstbijzijnde geldige stap — zelfde eindresultaat
+ * als loslaten na slepen, maar dan vanaf een handmatig getypt getal.
+ * @param {string} id
+ * @param {number} waarde
+ */
+function draaiwielSnapNaarWaarde(id, waarde) {
+  const strook = document.getElementById(`strook_${id}`);
+  const wrap = document.getElementById(`waardeWrap_${id}`);
+  if (!strook || !wrap) return;
+  const stap = parseFloat(strook.dataset.stap) || 1;
+  const dichtstbijzijnd = Math.round(waarde / stap) * stap;
+
+  wrap.innerHTML = `<span id="val_${id}"></span>`;
+  strook.classList.add('snappen');
+  draaiwielUpdateVisueel(id, dichtstbijzijnd, true);
+  setTimeout(() => strook.classList.remove('snappen'), 180);
 }
 
 function draaiwielIsVert(strook) {
@@ -3105,12 +3193,14 @@ function logVolgende() {
   bewaarHuidigeKaart();
   logIndex++;
   renderLogKaart();
+  window.scrollTo(0, 0);
 }
 
 function logVorige() {
   bewaarHuidigeKaart();
   logIndex--;
   renderLogKaart();
+  window.scrollTo(0, 0);
 }
 
 function logAfronden() {
