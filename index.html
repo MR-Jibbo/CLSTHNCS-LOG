@@ -10,7 +10,7 @@
   // Functies worden op window gehangen zodat het niet-module app.js ze kan aanroepen.
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
   import {
-    getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+    getAuth, setPersistence, inMemoryPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged
   } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
   import {
     getFirestore, collection, addDoc, query, where, orderBy, getDocs, serverTimestamp
@@ -29,10 +29,17 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  // Geen sessie-persistentie: de inlogstatus wordt nergens opgeslagen (niet in
+  // localStorage, niet in IndexedDB), dus elke keer dat de pagina wordt geladen
+  // (ook na een harde refresh of het heropenen van het tabblad) moet er opnieuw
+  // worden ingelogd. Firebase's standaardgedrag (browserLocalPersistence) zou de
+  // sessie juist tussen bezoeken onthouden — dat is hier bewust uitgezet.
+  const authKlaar = setPersistence(auth, inMemoryPersistence).catch(() => {});
+
   window.firebaseAuth = {
-    signIn: (email, wachtwoord) => signInWithEmailAndPassword(auth, email, wachtwoord),
+    signIn: (email, wachtwoord) => authKlaar.then(() => signInWithEmailAndPassword(auth, email, wachtwoord)),
     signOut: () => signOut(auth),
-    onChange: (callback) => onAuthStateChanged(auth, callback),
+    onChange: (callback) => authKlaar.then(() => onAuthStateChanged(auth, callback)),
     huidigeUser: () => auth.currentUser
   };
 
