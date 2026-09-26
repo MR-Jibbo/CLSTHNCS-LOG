@@ -2517,9 +2517,9 @@ function parseSetsEnTijd(target) {
   return { sets, secPerSet };
 }
 
-function renderTimerBlock(key, seconden, label) {
+function renderTimerBlock(key, seconden, label, instelSeconden) {
   if (!seconden) return '';
-  const state = timerState[key] || { actief: false, resterend: seconden, totaal: seconden, done: false };
+  const state = timerState[key] || { actief: false, resterend: seconden, totaal: seconden, done: false, instelSeconden: instelSeconden || 0 };
   timerState[key] = state;
   const labelTekst = label || 'Timer';
 
@@ -2595,12 +2595,17 @@ function timerStartPause(key) {
     s.actief = true;
     s.intervalId = setInterval(() => {
       s.resterend--;
+      const instelGrens = s.totaal - (s.instelSeconden || 0); // seconden-punt waar de instelperiode overgaat in de hold zelf
       if (s.resterend <= 0) {
         s.resterend = 0;
         s.actief = false;
         s.done = true;
         clearInterval(s.intervalId);
         timerAfgerond();
+      } else if (s.instelSeconden && s.resterend >= instelGrens) {
+        // Instelperiode (bv. de +5 sec om in positie te komen bij een hold-timer):
+        // elke seconde een piepje, zodat je weet hoeveel tijd je nog hebt om te positioneren.
+        speelCountdownPiep();
       } else if (s.resterend === 5 || s.resterend <= 3) {
         // Bij 5 sec één enkel biepje, dan stilte, en vanaf 3 sec elke seconde een piep.
         speelCountdownPiep();
@@ -3198,7 +3203,7 @@ function renderOefeningKaart(o, idx) {
           </select>
         </div>
       </div>
-      ${renderTimerBlock(timerKey, holdSeconden ? holdSeconden + 5 : holdSeconden, 'Hold-timer')}
+      ${renderTimerBlock(timerKey, holdSeconden ? holdSeconden + 5 : holdSeconden, 'Hold-timer', 5)}
       ${renderTimerBlock(rustTimerKey, rustSec, 'Rust-timer')}
     </div>
   `;
