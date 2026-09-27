@@ -45,14 +45,24 @@
 
   window.firebaseDb = {
     voegLogToe: (data) => addDoc(collection(db, "logs"), { ...data, aangemaaktOp: serverTimestamp() }),
+    // Haalt ALLE logs op (zonder filter/sorteer-query) en laat het filteren aan de
+    // aanroeper over. Een query die tegelijk filtert (where) én op een ander veld
+    // sorteert (orderBy) vereist in Firestore een handmatig aangemaakte composite
+    // index — zonder die index faalt de query stil, zonder duidelijke foutmelding
+    // in de UI. Voor de hoeveelheid logs die deze app ooit zal hebben (één persoon,
+    // een paar trainingen per week) is alles ophalen en client-side filteren
+    // sneller te bouwen en robuuster dan afhankelijk zijn van zo'n index.
     haalLogsOp: async (oefeningNaam) => {
-      const q = query(
-        collection(db, "logs"),
-        where("oefeningNaam", "==", oefeningNaam),
-        orderBy("aangemaaktOp", "asc")
-      );
+      const q = query(collection(db, "logs"));
       const snap = await getDocs(q);
-      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      return snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(log => log.oefeningNaam === oefeningNaam)
+        .sort((a, b) => {
+          const tijdA = a.aangemaaktOp && a.aangemaaktOp.toMillis ? a.aangemaaktOp.toMillis() : 0;
+          const tijdB = b.aangemaaktOp && b.aangemaaktOp.toMillis ? b.aangemaaktOp.toMillis() : 0;
+          return tijdA - tijdB;
+        });
     },
     haalAlleLogsOp: async () => {
       const q = query(collection(db, "logs"), orderBy("aangemaaktOp", "asc"));
@@ -3639,7 +3649,7 @@ function renderProgressieOverzicht() {
 
   app.innerHTML = `<div class="progress-tile-grid"><div class="empty-progress"><div class="empty-progress-title">Laden…</div></div></div>`;
 
-  haalLaatsteWaardePerOefeningOp().then(laatsteWaarden => {
+  haalLaatsteWaardePerOefeningOp().then(({ waarden: laatsteWaarden, debugInfo }) => {
     if (window.location.hash !== '#progressie') return; // ondertussen weggenavigeerd
 
     const tegels = ALLE_OEFENINGEN.map(naam => {
@@ -3653,10 +3663,24 @@ function renderProgressieOverzicht() {
       `;
     }).join('');
 
-    app.innerHTML = `<div class="progress-tile-grid">${tegels}</div>`;
+    // Diagnostische regel: alleen zichtbaar als er niets gevonden is, zodat je in de
+    // app zelf (ook op mobiel, zonder devtools) kunt zien wat er precies gebeurde.
+    const diagnoseHtml = Object.keys(laatsteWaarden).length === 0
+      ? `<div class="chart-sub" style="margin-bottom: 12px; opacity: 0.7;">${debugInfo}</div>`
+      : '';
+
+    app.innerHTML = `${diagnoseHtml}<div class="progress-tile-grid">${tegels}</div>`;
   }).catch((fout) => {
     console.error('Progressie-overzicht laden mislukt:', fout);
     if (window.location.hash !== '#progressie') return;
+    // Foutmelding zichtbaar in de app zelf tonen (niet alleen in de browser-console),
+    // zodat dit ook op mobiel (waar devtools lastig te bereiken zijn) te zien is.
+    const foutHtml = `
+      <div class="chart-card" style="margin-bottom: 16px;">
+        <div class="empty-progress-title" style="color: var(--danger);">Kon logs niet laden</div>
+        <div class="empty-progress-sub" style="font-family: 'SF Mono', monospace; font-size: 11px; word-break: break-word; margin-top: 8px;">${(fout && fout.message) ? fout.message : String(fout)}</div>
+      </div>
+    `;
     const tegels = ALLE_OEFENINGEN.map(naam => `
       <button class="progress-tile" onclick="go('progressie/${encodeURIComponent(naam)}')">
         <div class="pt-naam">${naam}</div>
@@ -3664,7 +3688,7 @@ function renderProgressieOverzicht() {
         <span class="pt-arrow">→</span>
       </button>
     `).join('');
-    app.innerHTML = `<div class="progress-tile-grid">${tegels}</div>`;
+    app.innerHTML = `${foutHtml}<div class="progress-tile-grid">${tegels}</div>`;
   });
 }
 
@@ -3673,17 +3697,21 @@ function renderProgressieOverzicht() {
  * client-side per oefeningnaam, zodat het overzicht niet voor elke tegel een
  * losse query hoeft te doen. Geeft per oefening alleen het laatste (meest
  * recente) datapunt terug, wat is wat het overzicht nodig heeft.
- * @returns {Promise<Object<string, {gewicht: number}>>}
+ * @returns {Promise<{waarden: Object<string, {gewicht: number}>, debugInfo: string}>}
  */
 async function haalLaatsteWaardePerOefeningOp() {
-  if (!window.firebaseDb || !window.firebaseAuth || !window.firebaseAuth.huidigeUser()) return {};
+  if (!window.firebaseDb) return { waarden: {}, debugInfo: 'firebaseDb is nog niet geladen (Firebase-script niet klaar).' };
+  if (!window.firebaseAuth) return { waarden: {}, debugInfo: 'firebaseAuth is nog niet geladen.' };
+  if (!window.firebaseAuth.huidigeUser()) return { waarden: {}, debugInfo: 'Geen ingelogde gebruiker gevonden op het moment van ophalen.' };
+
   const logs = await window.firebaseDb.haalAlleLogsOp(); // al gesorteerd oud → nieuw
   const laatste = {};
   logs.forEach(log => {
     const maxGewicht = Math.max(0, ...(log.sets || []).map(s => parseFloat(s.gewicht) || 0));
     laatste[log.oefeningNaam] = { gewicht: maxGewicht }; // latere logs overschrijven eerdere, dus dit blijft de meest recente
   });
-  return laatste;
+  const debugInfo = `${logs.length} document(en) opgehaald uit Firestore, ${Object.keys(laatste).length} unieke oefeningnamen daarin gevonden.`;
+  return { waarden: laatste, debugInfo };
 }
 
 let progressieWeergave = { toonSets: true, toonGewicht: true, periode: 10 }; // welke lagen/periode actief zijn per oefening-pagina
