@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="nl" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -15,7 +15,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Cali Log">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#211F1A">
+<meta name="theme-color" id="themeColorMeta" content="#14161A">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script type="module">
   // Firebase — modulaire SDK via CDN, geen build-stap nodig.
@@ -250,71 +250,81 @@
   window.dispatchEvent(new Event('firebase-klaar'));
 </script>
 <style>
+  /* ============================================================
+     DESIGN SYSTEM v2 — tokens
+     Donker antraciet is de basis; één accent (staalblauw) voor primaire acties,
+     selectie en voortgang in uitvoering. Groen = positief, amber = let op,
+     rood = fout of blokkade. De oude variabelenamen (--clay, --moss, --gold,
+     --bg-raised) blijven bestaan als alias, zodat bestaande regels meekleuren.
+     ============================================================ */
   :root {
-    /* Donker thema (standaard) — contrast opgehoogd t.o.v. eerdere versie */
-    --bg: #211F1A;
-    --bg-raised: #423D33;
-    --bg-raised-2: #4F4939;
-    --text: #FAF7F0;
-    --text-dim: #CFC6B4;
-    --clay: #B47D50;
-    --clay-bright: #D89665;
-    --moss: #7C8C68;
-    --moss-bright: #A0B586;
-    --gold: #E0BC7C;
-    --danger: #D17B65;
-    --border: #6B6350;
-    --radius-sm: 6px;
-    --radius-md: 10px;
+    --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+    --bg: #14161A;
+    --bg-raised: #1C1F25;
+    --bg-raised-2: #262A32;
+    --text: #EDEFF2;
+    --text-dim: #A3AAB6;
+    --text-faint: #7A8290;
+    --border: #2E333C;
+    --border-strong: #404652;
+
+    --accent: #5DB7F2;
+    --accent-bright: #86CCF8;
+    --accent-ink: #06141F;
+    --accent-soft: rgba(93, 183, 242, 0.14);
+
+    --green: #4CD08A;
+    --green-ink: #04150B;
+    --green-soft: rgba(76, 208, 138, 0.14);
+    --warn: #F0B04A;
+    --warn-soft: rgba(240, 176, 74, 0.14);
+    --danger: #F2705F;
+    --danger-soft: rgba(242, 112, 95, 0.14);
+
+    /* Aliassen voor bestaande regels */
+    --clay: var(--accent);
+    --clay-bright: var(--accent-bright);
+    --gold: var(--accent);
+    --moss: #2F9E66;
+    --moss-bright: var(--green);
+    --on-accent: var(--accent-ink);
+
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+
+    --nav-h: 64px;
+    --sidebar-w: 232px;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+    color-scheme: dark;
   }
 
-  @media (prefers-color-scheme: light) {
-    :root {
-      --bg: #FAF7F0;
-      --bg-raised: #FFFFFF;
-      --bg-raised-2: #F1ECE0;
-      --text: #2A2620;
-      --text-dim: #5C5648;
-      --clay: #9C5F31;
-      --clay-bright: #B4703C;
-      --moss: #4E5F3D;
-      --moss-bright: #3F4E31;
-      --gold: #8A6423;
-      --danger: #A5402B;
-      --border: #D8D0BE;
-    }
-  }
-
-  /* Handmatige thema-keuze via de knop wint altijd van de systeeminstelling hierboven,
-     ongeacht of het apparaat zelf op licht of donker staat. */
   html[data-theme="light"] {
-    --bg: #FAF7F0;
+    --bg: #F2F3F6;
     --bg-raised: #FFFFFF;
-    --bg-raised-2: #F1ECE0;
-    --text: #2A2620;
-    --text-dim: #5C5648;
-    --clay: #9C5F31;
-    --clay-bright: #B4703C;
-    --moss: #4E5F3D;
-    --moss-bright: #3F4E31;
-    --gold: #8A6423;
-    --danger: #A5402B;
-    --border: #D8D0BE;
-  }
+    --bg-raised-2: #E9ECF1;
+    --text: #14171C;
+    --text-dim: #566070;
+    --text-faint: #7B8594;
+    --border: #DCE0E7;
+    --border-strong: #C4CAD4;
 
-  html[data-theme="dark"] {
-    --bg: #211F1A;
-    --bg-raised: #423D33;
-    --bg-raised-2: #4F4939;
-    --text: #FAF7F0;
-    --text-dim: #CFC6B4;
-    --clay: #B47D50;
-    --clay-bright: #D89665;
-    --moss: #7C8C68;
-    --moss-bright: #A0B586;
-    --gold: #E0BC7C;
-    --danger: #D17B65;
-    --border: #6B6350;
+    --accent: #1B78BC;
+    --accent-bright: #145F99;
+    --accent-ink: #FFFFFF;
+    --accent-soft: rgba(27, 120, 188, 0.10);
+
+    --green: #17804F;
+    --green-ink: #FFFFFF;
+    --green-soft: rgba(23, 128, 79, 0.10);
+    --warn: #A15F00;
+    --warn-soft: rgba(161, 95, 0, 0.10);
+    --danger: #BE3A2E;
+    --danger-soft: rgba(190, 58, 46, 0.10);
+
+    --moss: #17804F;
+    color-scheme: light;
   }
 
   * { box-sizing: border-box; }
@@ -324,8 +334,11 @@
     padding: 0;
     background: var(--bg);
     color: var(--text);
-    font-family: 'Iowan Old Style', 'Georgia', serif;
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.45;
     -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
 
   body {
@@ -334,7 +347,7 @@
   }
 
   h1, h2, h3, .mono {
-    font-family: 'SF Mono', 'Courier New', Courier, monospace;
+    font-family: var(--font);
     font-weight: 600;
     letter-spacing: -0.01em;
   }
@@ -374,22 +387,13 @@
     padding: 0;
   }
 
-  /* Precies één icoon zichtbaar: welk dat is, hangt af van het EFFECTIEVE thema
-     (handmatige keuze via data-theme, anders de systeeminstelling). */
-  .theme-icon-dark { display: none; }
-  html[data-theme="dark"] .theme-icon-light,
-  html:not([data-theme]) .theme-icon-light { display: none; }
-  html[data-theme="dark"] .theme-icon-dark,
-  html:not([data-theme]) .theme-icon-dark { display: inline; }
-  @media (prefers-color-scheme: light) {
-    html:not([data-theme]) .theme-icon-light { display: inline; }
-    html:not([data-theme]) .theme-icon-dark { display: none; }
-  }
+  /* Eén icoon zichtbaar: het maan-icoon in donker (standaard), de zon in licht. */
+  .theme-icon-light { display: none; }
   html[data-theme="light"] .theme-icon-light { display: inline; }
   html[data-theme="light"] .theme-icon-dark { display: none; }
 
   header.top .crumb {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 13px;
     color: var(--text-dim);
     margin-bottom: 6px;
@@ -419,7 +423,7 @@
     color: var(--text-dim);
     font-size: 14px;
     margin-top: 4px;
-    font-family: 'Iowan Old Style', Georgia, serif;
+    font-family: var(--font);
   }
 
   /* ===== Main menu ===== */
@@ -459,7 +463,7 @@
     font-size: 14px;
     color: var(--text-dim);
     margin-top: 4px;
-    font-family: 'Iowan Old Style', Georgia, serif;
+    font-family: var(--font);
   }
 
   .menu-card .arrow {
@@ -500,7 +504,7 @@
   .day-card:hover { border-color: var(--moss-bright); }
 
   .day-card .tag {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 11px;
     color: var(--gold);
     margin-bottom: 8px;
@@ -519,7 +523,7 @@
 
   /* ===== Buttons ===== */
   .btn {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 14px;
     padding: 12px 20px;
     border-radius: var(--radius-sm);
@@ -587,7 +591,7 @@
   }
 
   .verlaat-titel {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 17px;
     color: var(--text);
     margin-bottom: 8px;
@@ -634,7 +638,7 @@
   .block-head .meta {
     font-size: 12px;
     color: var(--text-dim);
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
   }
 
   ul.simple {
@@ -669,7 +673,7 @@
     display: flex;
     gap: 14px;
     flex-wrap: wrap;
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 12px;
     color: var(--text-dim);
   }
@@ -685,14 +689,14 @@
   }
 
   .ex-row .ex-progressie {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 11px;
     color: var(--moss-bright);
     margin-top: 6px;
   }
 
   .ex-progressie-log {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 12px;
     color: var(--moss-bright);
     background: var(--bg);
@@ -708,7 +712,7 @@
   }
 
   .nood-keuze-titel {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 13px;
     color: var(--gold);
     margin-bottom: 10px;
@@ -751,7 +755,7 @@
 
   .overlap-badge {
     display: inline-block;
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 10px;
     padding: 2px 8px;
     border-radius: 999px;
@@ -781,7 +785,7 @@
   }
 
   .nood-optie-dag {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 10px;
     color: var(--text-dim);
     margin-bottom: 3px;
@@ -793,7 +797,7 @@
   }
 
   .nood-optie-target {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 11px;
     color: var(--moss-bright);
     margin-top: 4px;
@@ -811,7 +815,7 @@
   .nood-keuze-hint {
     margin-top: 20px;
     text-align: center;
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 12px;
     color: var(--text-dim);
   }
@@ -829,7 +833,7 @@
   }
 
   .changelog .cl-title {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     color: var(--moss-bright);
     font-size: 12px;
     margin-bottom: 6px;
@@ -850,7 +854,7 @@
   }
 
   .log-ex .ex-target {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 12px;
     color: var(--text-dim);
     margin-bottom: 14px;
@@ -865,7 +869,7 @@
   }
 
   .set-row .set-num {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 12px;
     color: var(--gold);
     text-align: center;
@@ -881,7 +885,7 @@
   .set-blok:last-child { border-bottom: none; padding-bottom: 4px; }
 
   .set-blok-titel {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 13px;
     color: var(--text);
     margin-bottom: 10px;
@@ -911,7 +915,7 @@
   .wiel-paneel.gewicht-paneel { flex: 1; }
 
   .wiel-paneel-titel {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 11px;
     color: var(--text-dim);
     margin-bottom: 8px;
@@ -982,7 +986,7 @@
   .lineaal-cijfer {
     position: absolute;
     bottom: 0;
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 9px;
     color: var(--text-dim);
     transform: translateX(-50%);
@@ -1092,7 +1096,7 @@
   .lineaal-wrap.verticaal .lineaal-fade-r { top: auto; bottom: 0; left: 0; background: linear-gradient(0deg, var(--bg), transparent); }
 
   .draaiwiel-waarde {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 15px;
     font-weight: 600;
     color: var(--text);
@@ -1104,7 +1108,7 @@
   }
 
   .handmatige-invoer {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 15px;
     font-weight: 600;
     color: var(--text);
@@ -1136,7 +1140,7 @@
     color: var(--text);
     border-radius: var(--radius-sm);
     padding: 10px 10px;
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 14px;
     appearance: none;
     -webkit-appearance: none;
@@ -1150,12 +1154,6 @@
     padding-right: 28px;
   }
 
-  @media (prefers-color-scheme: light) {
-    select {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A6423' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-    }
-  }
-
   html[data-theme="light"] select {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A6423' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   }
@@ -1165,7 +1163,7 @@
   }
 
   .field-label {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 11px;
     color: var(--text-dim);
     display: block;
@@ -1250,7 +1248,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 13px;
   }
 
@@ -1289,7 +1287,7 @@
   }
 
   .uitleg-label {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 10px;
     color: var(--gold);
     letter-spacing: 0.02em;
@@ -1310,7 +1308,7 @@
   }
 
   .timer-toggle .tt-label {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 12px;
     color: var(--text-dim);
     display: flex;
@@ -1350,7 +1348,7 @@
   }
 
   .timer-display .time {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 40px;
     color: var(--gold);
     font-weight: 600;
@@ -1368,7 +1366,7 @@
   }
 
   .timer-controls button {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 12px;
     padding: 8px 16px;
     border-radius: var(--radius-sm);
@@ -1427,7 +1425,7 @@
   }
 
   .wc-item .wc-dur {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 11px;
     color: var(--text-dim);
   }
@@ -1443,7 +1441,7 @@
   }
 
   .wc-set-label {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 11px;
     color: var(--gold);
     display: block;
@@ -1479,7 +1477,7 @@
   }
 
   .progress-tile .pt-sub {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 12px;
     color: var(--text-dim);
     margin-top: 4px;
@@ -1520,7 +1518,7 @@
   }
 
   .progress-toggle {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 13px;
     padding: 10px 18px;
     border-radius: 999px;
@@ -1556,7 +1554,7 @@
   }
 
   .chart-card .chart-sub {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 11px;
     color: var(--text-dim);
     margin-bottom: 14px;
@@ -1579,7 +1577,7 @@
   }
 
   .periode-toggle {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 11px;
     padding: 4px 9px;
     border-radius: 999px;
@@ -1613,7 +1611,7 @@
   }
 
   .stat-strip .stat .v {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 17px;
     color: var(--gold);
   }
@@ -1622,7 +1620,7 @@
     font-size: 10px;
     color: var(--text-dim);
     margin-top: 2px;
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
   }
 
   /* ===== Login ===== */
@@ -1674,7 +1672,7 @@
     color: var(--text);
     border-radius: var(--radius-sm);
     padding: 12px;
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 14px;
     margin-bottom: 10px;
   }
@@ -1683,11 +1681,11 @@
     color: var(--danger);
     font-size: 13px;
     margin-top: 8px;
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
   }
 
   .auth-status {
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 12px;
     color: var(--moss-bright);
     display: flex;
@@ -1707,7 +1705,7 @@
     color: #F5F7F0;
     padding: 12px 22px;
     border-radius: 999px;
-    font-family: 'SF Mono', monospace;
+    font-family: var(--font);
     font-size: 13px;
     opacity: 0;
     transition: all 0.25s ease;
@@ -1913,7 +1911,7 @@
   .week-kaart h3 { margin: 0 0 8px 0; font-size: 15px; }
   .week-kaart .week-sub { color: var(--text-dim); font-size: 13px; margin: 0 0 10px 0; line-height: 1.4; }
   .week-nav { display: flex; gap: 8px; align-items: center; justify-content: space-between; margin: 0 0 14px 0; }
-  .week-nav .week-titel { font-family: 'SF Mono', 'Courier New', Courier, monospace; font-size: 13px; text-align: center; flex: 1; }
+  .week-nav .week-titel { font-family: var(--font); font-size: 13px; text-align: center; flex: 1; }
   .week-nav .btn { padding: 8px 12px; }
   .vol-rij { display: grid; grid-template-columns: 112px 1fr 54px; gap: 8px; align-items: center; margin: 7px 0; font-size: 13px; }
   .vol-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1925,7 +1923,7 @@
   .vol-vulling.goed { background: var(--moss-bright); }
   .vol-vulling.hoog { background: var(--gold); }
   .vol-vulling.zeerHoog { background: var(--danger); }
-  .vol-getal { font-family: 'SF Mono', 'Courier New', Courier, monospace; text-align: right; }
+  .vol-getal { font-family: var(--font); text-align: right; }
   .vol-status { grid-column: 2 / 4; font-size: 11px; color: var(--text-dim); margin-top: -4px; }
   .vol-legenda { font-size: 12px; color: var(--text-dim); margin-top: 8px; line-height: 1.4; }
   .status-chip { display: inline-block; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--border); font-size: 11px; margin-left: 4px; }
@@ -1939,33 +1937,457 @@
   .week-lijst { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.5; }
   .week-lijst li { margin: 3px 0; }
   .criterium { display: flex; gap: 8px; font-size: 13px; line-height: 1.4; margin: 6px 0; }
-  .criterium .vink { flex: 0 0 18px; font-family: 'SF Mono', 'Courier New', Courier, monospace; }
+  .criterium .vink { flex: 0 0 18px; font-family: var(--font); }
   .deload-kaart { border-color: var(--gold); }
   .deload-kaart.actief { border-color: var(--moss-bright); }
   .deload-acties { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
   .deload-banner { background: var(--bg-raised-2); border: 1px solid var(--moss-bright); border-radius: var(--radius-md); padding: 10px 14px; margin: 0 0 12px 0; font-size: 13px; line-height: 1.45; }
   .energie-kiezer { margin: 14px 0 0 0; padding: 12px 14px; background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius-md); }
   .energie-knoppen { display: flex; gap: 8px; margin-top: 6px; }
-  .energie-knop { flex: 1; padding: 10px 0; background: var(--bg-raised-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: 'SF Mono', 'Courier New', Courier, monospace; font-size: 16px; cursor: pointer; }
+  .energie-knop { flex: 1; padding: 10px 0; background: var(--bg-raised-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-family: var(--font); font-size: 16px; cursor: pointer; }
   .energie-knop.gekozen { border-color: var(--gold); background: var(--bg-raised-2); box-shadow: inset 0 0 0 1px var(--gold); font-weight: 700; }
 
-  .rapport-groot { font-family: 'SF Mono', 'Courier New', Courier, monospace; font-size: 26px; font-weight: 600; margin: 2px 0 6px 0; }
+  .rapport-groot { font-family: var(--font); font-size: 26px; font-weight: 600; margin: 2px 0 6px 0; }
   .rapport-groot span { font-size: 13px; font-weight: 400; color: var(--text-dim); }
   .week-nav .week-titel small { color: var(--text-dim); font-size: 11px; }
+
+  /* ============================================================
+     DESIGN SYSTEM v2 — componenten (laat de basisregels hierboven intact,
+     overschrijft alleen uiterlijk; gedrag en class-namen blijven gelijk)
+     ============================================================ */
+  h1, h2, h3, .mono { font-family: var(--font); font-weight: 700; letter-spacing: -0.02em; }
+  .mono, .tabnum { font-variant-numeric: tabular-nums; }
+  button { font-family: var(--font); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  ::selection { background: var(--accent); color: var(--accent-ink); }
+
+  /* ----- App-shell ----- */
+  body { padding: 0 0 calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 32px); }
+  body[data-nav="uit"] { padding-bottom: 32px; }
+  .wrap { max-width: 720px; padding: 0 20px; }
+
+  header.top {
+    max-width: 720px;
+    padding: calc(22px + env(safe-area-inset-top, 0px)) 20px 14px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .top-tekst { min-width: 0; flex: 1; }
+  .top-acties { display: flex; gap: 8px; flex-shrink: 0; }
+  .icoon-knop {
+    width: 44px; height: 44px; padding: 0;
+    display: grid; place-items: center;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--bg-raised);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: color .15s, border-color .15s, background .15s;
+  }
+  .icoon-knop:hover { color: var(--text); border-color: var(--border-strong); }
+  .icoon-knop svg { width: 20px; height: 20px; display: block; }
+  .theme-toggle-btn { position: static; width: 44px; height: 44px; border-radius: var(--radius-md); font-size: inherit; }
+  .theme-icon-light, .theme-icon-dark { line-height: 0; }
+  header.top h1 { font-size: 28px; line-height: 1.12; padding: 0; margin: 0; }
+  header.top .sub { font-family: var(--font); font-size: 15px; color: var(--text-dim); margin-top: 6px; }
+  header.top .crumb { font-family: var(--font); font-size: 13px; color: var(--text-faint); margin-bottom: 8px; gap: 6px; flex-wrap: wrap; }
+  header.top .crumb:empty { display: none; }
+  header.top .crumb button { color: var(--text-dim); padding: 6px 0; font-weight: 500; }
+  header.top .crumb button:hover { color: var(--text); }
+
+  /* Navigatie: onderbalk op mobiel/tablet, zijbalk op desktop */
+  .nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    display: flex;
+    height: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+  }
+  @supports (backdrop-filter: blur(1px)) {
+    .nav { background: color-mix(in srgb, var(--bg) 90%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+  }
+  body[data-nav="uit"] .nav { display: none; }
+  .nav-merk { display: none; }
+  .nav-item {
+    flex: 1; position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    background: none; border: 0; padding: 0; min-height: 48px;
+    color: var(--text-faint);
+    font: 600 11px/1 var(--font); letter-spacing: 0;
+    cursor: pointer;
+    transition: color .15s;
+  }
+  .nav-item svg { width: 24px; height: 24px; display: block; }
+  .nav-item:hover { color: var(--text-dim); }
+  .nav-item[aria-current="page"] { color: var(--accent); }
+  .nav-item[aria-current="page"]::before {
+    content: ''; position: absolute; top: -1px; left: 28%; right: 28%; height: 2px;
+    background: var(--accent); border-radius: 0 0 2px 2px;
+  }
+
+  @media (min-width: 960px) {
+    body { padding: 0 0 48px var(--sidebar-w); }
+    body[data-nav="uit"] { padding-left: 0; }
+    .nav {
+      top: 0; bottom: auto; right: auto; width: var(--sidebar-w); height: 100vh;
+      flex-direction: column; justify-content: flex-start; gap: 2px;
+      padding: 24px 12px; border-top: 0; border-right: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .nav-merk {
+      display: flex; align-items: center; gap: 10px; padding: 4px 12px 24px;
+      font-weight: 700; font-size: 16px; letter-spacing: -0.01em; color: var(--text);
+    }
+    .nav-merk img { width: 32px; height: 32px; border-radius: 8px; display: block; }
+    .nav-item {
+      flex: none; flex-direction: row; justify-content: flex-start; gap: 12px;
+      height: 44px; padding: 0 12px; border-radius: 10px; font-size: 15px; font-weight: 600;
+    }
+    .nav-item[aria-current="page"] { background: var(--accent-soft); }
+    .nav-item[aria-current="page"]::before { top: 10px; bottom: 10px; left: 0; right: auto; width: 3px; height: auto; border-radius: 0 3px 3px 0; }
+    .nav-item:hover { background: var(--bg-raised); }
+    body[data-breed="ruim"] .wrap, body[data-breed="ruim"] header.top { max-width: 1080px; }
+    .wrap, header.top { margin-left: 0; margin-right: auto; }
+    header.top { padding-left: 32px; padding-right: 32px; }
+    .wrap { padding: 0 32px; }
+    #toast { bottom: 28px; }
+  }
+
+  /* ----- Knoppen ----- */
+  .btn {
+    font-family: var(--font); font-size: 15px; font-weight: 600; letter-spacing: -0.005em;
+    min-height: 48px; padding: 0 20px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-strong);
+    background: var(--bg-raised-2);
+    color: var(--text);
+    transition: background .15s, border-color .15s, transform .1s var(--ease);
+  }
+  .btn:hover { border-color: var(--text-faint); }
+  .btn:active { transform: scale(0.98); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn.primary:hover { background: var(--accent-bright); border-color: var(--accent-bright); }
+  .btn.danger-outline { background: transparent; border-color: var(--danger); color: var(--danger); }
+  .btn.danger-outline:hover { background: var(--danger-soft); color: var(--danger); }
+  .btn.ghost { background: transparent; border-color: transparent; color: var(--text-dim); }
+  .btn.ghost:hover { background: var(--bg-raised-2); color: var(--text); border-color: transparent; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+  .btn.groot { min-height: 56px; font-size: 17px; }
+
+  /* ----- Formulieren ----- */
+  select, input[type="number"], input[type="text"], input[type="email"], input[type="password"] {
+    font-family: var(--font); font-size: 16px;
+    min-height: 48px; padding: 0 12px;
+    background: var(--bg-raised-2); border: 1px solid var(--border-strong); color: var(--text);
+    border-radius: var(--radius-sm);
+  }
+  select, html[data-theme="light"] select, html[data-theme="dark"] select {
+    padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A3AAB6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 10px center;
+  }
+  html[data-theme="light"] select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23566070' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  }
+  .field-label { font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--text-dim); margin-bottom: 6px; }
+
+  /* ----- Home en Trainen (menu) ----- */
+  .day-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 8px; }
+  .day-card {
+    aspect-ratio: auto; min-height: 76px;
+    flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px;
+    padding: 16px 18px; border-radius: var(--radius-md);
+    background: var(--bg-raised); border: 1px solid var(--border);
+    text-align: left;
+  }
+  .day-card:hover { border-color: var(--border-strong); }
+  .day-card .tag { font-family: var(--font); font-size: 13px; font-weight: 600; color: var(--accent); margin: 0; order: 2; }
+  .day-card .title { font-size: 18px; font-weight: 600; line-height: 1.25; order: 1; }
+  .day-card.noodtraining { background: var(--bg-raised); border-color: var(--warn); }
+  .day-card.noodtraining .tag { color: var(--warn); }
+  @media (min-width: 700px) { .day-grid { grid-template-columns: 1fr 1fr; } }
+
+  .changelog { background: transparent; border: 0; border-left: 2px solid var(--border-strong); border-radius: 0; padding: 4px 0 4px 14px; margin-top: 28px; font-size: 13px; color: var(--text-dim); }
+  .changelog .cl-title { font-family: var(--font); font-size: 13px; font-weight: 600; color: var(--text-dim); margin-bottom: 6px; }
+
+  /* ----- Dagdetail: schema als rijen, niet als kaarten ----- */
+  .block { margin-top: 32px; }
+  .block-head { margin-bottom: 4px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  .block-head h2 { font-size: 18px; color: var(--text); }
+  .block-head .meta { font-family: var(--font); font-size: 13px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+  ul.simple { font-size: 15px; line-height: 1.5; }
+  ul.simple li { padding: 11px 0; border-bottom: 1px solid var(--border); }
+  ul.simple li::before { content: none; }
+  .ex-row { background: transparent; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; padding: 14px 0; margin: 0; }
+  .ex-row .ex-name { font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+  .ex-row .ex-specs { font-family: var(--font); font-size: 14px; gap: 6px 16px; font-variant-numeric: tabular-nums; }
+  .ex-row .ex-specs b { color: var(--text); font-weight: 700; }
+  .ex-row .ex-focus { font-style: normal; font-size: 13px; color: var(--text-dim); }
+  .ex-row .ex-progressie { font-family: var(--font); font-size: 13px; color: var(--accent); margin-top: 6px; }
+  .ex-progressie-log { font-family: var(--font); font-size: 13px; color: var(--accent); background: var(--accent-soft); border-radius: var(--radius-sm); }
+
+  /* ----- Trainingskaart ----- */
+  .log-ex { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 14px; }
+  .log-ex .ex-title { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+  .log-ex .ex-target { font-family: var(--font); font-size: 14px; color: var(--text-dim); margin-bottom: 16px; font-variant-numeric: tabular-nums; }
+  .set-blok-titel { font-family: var(--font); font-size: 14px; font-weight: 600; }
+  .set-row .set-num { font-family: var(--font); color: var(--accent); }
+
+  .prog-dots { gap: 4px; margin: 4px 0 20px; }
+  .prog-dot { flex: 1; height: 4px; width: auto; border-radius: 2px; background: var(--border-strong); }
+  .prog-dot.done { background: var(--green); }
+  .prog-dot.active { flex: 2.4; width: auto; border-radius: 2px; background: var(--accent); }
+
+  .setstrip { gap: 8px; margin: 2px 0 18px; justify-content: flex-start; }
+  .setstrip-bol {
+    width: 44px; height: 44px; border-radius: 12px; font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums;
+    border: 1.5px solid var(--border-strong); background: transparent; color: var(--text-dim);
+  }
+  .setstrip-bol.actief { border-color: var(--accent); color: var(--text); background: var(--accent-soft); box-shadow: none; }
+  .setstrip-bol.klasse-goed { background: var(--green); border-color: var(--green); color: var(--green-ink); }
+  .setstrip-bol.klasse-waarschuwing { background: var(--warn); border-color: var(--warn); color: #1A1204; }
+  .setstrip-bol.klasse-fout { background: var(--danger); border-color: var(--danger); color: #1F0804; }
+  .setstrip-bol.klasse-goed.actief, .setstrip-bol.klasse-waarschuwing.actief, .setstrip-bol.klasse-fout.actief { box-shadow: 0 0 0 2px var(--bg-raised), 0 0 0 4px var(--accent); }
+
+  .wiel-paneel { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 10px 10px; }
+  .wiel-paneel-titel { font-family: var(--font); font-size: 13px; font-weight: 500; color: var(--text-dim); margin-bottom: 8px; }
+  .draaiwiel-waarde { font-family: var(--font); font-size: 34px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; background: transparent; padding: 6px 10px; border-radius: 8px; font-variant-numeric: tabular-nums; }
+  .draaiwiel-eenheid { font-size: 14px; font-weight: 500; color: var(--text-dim); }
+  .handmatige-invoer { font-family: var(--font); font-size: 28px; font-weight: 800; min-height: 0; width: 86px; background: var(--bg-raised-2); border: 1.5px solid var(--accent); border-radius: 8px; padding: 2px 6px; }
+  .lineaal-cijfer { font-family: var(--font); font-variant-numeric: tabular-nums; }
+  .lineaal-wijzer { background: var(--accent); }
+  .lineaal-wijzer::after { border-top-color: var(--accent); }
+  .lineaal-wrap.verticaal .lineaal-wijzer::after { border-right-color: var(--accent); }
+
+  .keuze-knop {
+    min-height: 52px; padding: 0 6px; font-family: var(--font); font-size: 15px; font-weight: 600;
+    border: 1.5px solid var(--border-strong); background: transparent; color: var(--text); border-radius: var(--radius-md);
+    transition: background .12s, border-color .12s, color .12s, transform .1s var(--ease);
+  }
+  .keuze-knop:active { transform: scale(0.97); }
+  .keuze-knop.gekozen { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+  .rir-knoppen, .vorm-knoppen { gap: 8px; margin: 8px 0 16px; }
+  .pijn-schakelaar-rij { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 6px 14px; min-height: 52px; }
+  .switch.on { background: var(--accent); border-color: var(--accent); }
+
+  .log-nav { grid-template-columns: 1fr 1.4fr; gap: 10px; margin-top: 14px; position: sticky; bottom: 0; z-index: 5; background: var(--bg); padding: 12px 0 calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--border); }
+  .nav-btn { min-height: 56px; padding: 0 14px; font-size: 16px; }
+
+  .feedbackpaneel { background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--border-strong); border-radius: var(--radius-md); padding: 16px; }
+  .feedbackpaneel.klasse-goed { border-left-color: var(--green); }
+  .feedbackpaneel.klasse-waarschuwing { border-left-color: var(--warn); }
+  .feedbackpaneel.klasse-fout { border-left-color: var(--danger); }
+  .feedback-chip { padding: 3px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; letter-spacing: 0.02em; text-transform: none; }
+  .feedback-chip.klasse-goed { background: var(--green-soft); color: var(--green); }
+  .feedback-chip.klasse-waarschuwing { background: var(--warn-soft); color: var(--warn); }
+  .feedback-chip.klasse-fout { background: var(--danger-soft); color: var(--danger); }
+  .feedback-reden { font-size: 15px; line-height: 1.5; }
+  .feedback-advies { font-size: 14px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+
+  .voorstel-blok { background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--radius-md); padding: 14px; }
+  .voorstel-afgehandeld { font-style: normal; }
+
+  /* ----- Timer, uitleg, warm-up ----- */
+  .timer-ring-fg { stroke: var(--accent); }
+  .timer-ring-wrap.done .timer-ring-fg { stroke: var(--green); }
+  .timer-display .time, .timer-ring-wrap .time { font-family: var(--font); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .timer-display .time { color: var(--text); }
+  .timer-controls button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .timer-toggle .tt-label, .wc-set-label, .wc-item .wc-name { font-family: var(--font); }
+  .uitleg-toggle-btn { font-family: var(--font); font-size: 14px; font-weight: 600; }
+  .uitleg-toggle-btn.open { border-color: var(--accent); color: var(--accent); }
+  .uitleg-label { color: var(--accent); }
+  .notitie-veld textarea { background: var(--bg); border-color: var(--border-strong); font-size: 16px; }
+
+  /* ----- Popup, toast, banner ----- */
+  .verlaat-overlay { background: rgba(5, 7, 10, 0.66); }
+  .verlaat-modal { background: var(--bg-raised); border: 1px solid var(--border-strong); border-bottom: 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+  @media (min-width: 480px) { .verlaat-modal { border-bottom: 1px solid var(--border-strong); border-radius: var(--radius-lg); } }
+  .verlaat-titel { font-family: var(--font); font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+  .verlaat-tekst { font-size: 15px; }
+  #toast {
+    bottom: calc(var(--nav-h) + 16px + env(safe-area-inset-bottom, 0px));
+    background: var(--bg-raised-2); color: var(--text); border: 1px solid var(--border-strong);
+    font-family: var(--font); font-size: 15px; font-weight: 600; border-radius: 12px; padding: 12px 18px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    white-space: normal; max-width: calc(100vw - 32px); text-align: center;
+  }
+  body[data-nav="uit"] #toast { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .herstel-banner { background: var(--bg-raised); border: 1px solid var(--border-strong); border-left: 3px solid var(--warn); border-radius: var(--radius-md); padding: 16px; }
+  .herstel-banner-titel { font-size: 16px; }
+  .herstel-banner-knoppen .btn { min-height: 44px; font-size: 14px; }
+
+  /* ----- Voorstellen en samenvatting ----- */
+  .oefening-beslissing-kaart { text-align: left; padding: 8px 0 4px; }
+  .oefening-beslissing-titel { font-size: 24px; letter-spacing: -0.02em; }
+  .oefening-beslissing-titel.klasse-goed { color: var(--green); }
+  .oefening-beslissing-titel.klasse-waarschuwing { color: var(--warn); }
+  .oefening-beslissing-titel.klasse-fout { color: var(--danger); }
+  .oefening-beslissing-reden { font-size: 15px; line-height: 1.5; }
+  .oefening-beslissing-doel { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); font-size: 16px; font-weight: 600; padding: 14px; font-variant-numeric: tabular-nums; }
+  .sv-kop { font-size: 13px; font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--text-dim); margin: 20px 0 8px; }
+  .sv-set { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); min-height: 48px; }
+  .sv-nr { background: var(--bg-raised-2); font-variant-numeric: tabular-nums; }
+  .sv-tekst { font-variant-numeric: tabular-nums; }
+  .sv-regel { font-size: 12px; color: var(--text-faint); }
+  .sv-niveau { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); }
+  .sv-waarschuwing { border-color: var(--danger); background: var(--danger-soft); border-radius: var(--radius-md); }
+  .sv-stagnatie { border-color: var(--warn); background: var(--warn-soft); border-radius: var(--radius-md); }
+  .sv-stagnatie-titel { color: var(--warn); }
+  .sv-keuze { color: var(--green); font-weight: 600; }
+  .overrule-keuze { background: var(--bg); border: 1.5px solid var(--border-strong); border-radius: var(--radius-md); min-height: 56px; }
+  .overrule-keuze.gekozen { border-color: var(--accent); background: var(--accent-soft); }
+  .gesch-rij, .gesch-training { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius-md); }
+
+  /* ----- Voortgang: tegels, grafiek, stats ----- */
+  .progress-tile { background: transparent; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; }
+  .progress-tile .pt-naam { font-size: 16px; font-weight: 600; }
+  .progress-tile .pt-sub { font-family: var(--font); font-variant-numeric: tabular-nums; }
+  .progress-tile .pt-arrow { color: var(--text-faint); }
+  .chart-card { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+  .chart-card .chart-title { font-family: var(--font); }
+  .periode-toggle, .progress-toggle { font-family: var(--font); font-weight: 600; border-radius: 10px; min-height: 40px; }
+  .periode-toggle.actief, .progress-toggle.actief, .progress-toggle:nth-of-type(2).actief { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .stat-strip .stat .v { font-family: var(--font); font-size: 28px; font-weight: 800; letter-spacing: -0.03em; color: var(--text); font-variant-numeric: tabular-nums; }
+  .stat-strip .stat .l { color: var(--text-dim); }
+
+  /* ----- Week en maand ----- */
+  .week-kaart { background: transparent; border: 0; border-top: 1px solid var(--border); border-radius: 0; padding: 22px 0 8px; margin: 0; }
+  .week-kaart h3 { font-size: 18px; margin-bottom: 10px; }
+  .week-kaart.deload-kaart, .deload-kaart { background: var(--bg-raised); border: 1px solid var(--border); border-left: 3px solid var(--warn); border-radius: var(--radius-md); padding: 16px; margin-bottom: 8px; }
+  .deload-kaart.actief { border-left-color: var(--green); }
+  .week-nav { margin-bottom: 8px; }
+  .week-nav .week-titel { font-family: var(--font); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .week-nav .btn { min-height: 44px; padding: 0 14px; font-size: 14px; }
+  .vol-rij { grid-template-columns: 140px 1fr 44px; gap: 10px; margin: 10px 0; font-size: 14px; }
+  .vol-spoor { height: 8px; border-radius: 4px; background: var(--bg-raised-2); }
+  .vol-band { background: var(--green); opacity: .22; }
+  .vol-vulling { border-radius: 4px; }
+  .vol-vulling.laag { background: var(--text-faint); }
+  .vol-vulling.onderStreefbereik { background: var(--warn); }
+  .vol-vulling.goed { background: var(--green); }
+  .vol-vulling.hoog { background: var(--warn); }
+  .vol-vulling.zeerHoog { background: var(--danger); }
+  .vol-getal { font-family: var(--font); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .vol-status { font-size: 12px; color: var(--text-faint); }
+  .status-chip { border-radius: 6px; font-size: 12px; }
+  .energie-staaf .staaf { background: var(--accent); max-width: 24px; border-radius: 4px; }
+  .energie-staaf .staaf.laag { background: var(--warn); }
+  .energie-kiezer { background: var(--bg-raised); border-radius: var(--radius-lg); padding: 16px; }
+  .energie-knop { font-family: var(--font); font-weight: 700; min-height: 52px; border-radius: var(--radius-md); background: transparent; border: 1.5px solid var(--border-strong); }
+  .energie-knop.gekozen { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); box-shadow: none; }
+  .deload-banner { border-radius: var(--radius-md); border: 1px solid var(--border); border-left: 3px solid var(--green); background: var(--bg-raised); }
+  .criterium .vink, .week-nav .week-titel, .rapport-groot { font-family: var(--font); }
+  .rapport-groot { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+
+  /* ----- Login en overig ----- */
+  .login-box, .login-scherm .login-box { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+  .login-box input { background: var(--bg-raised-2); }
+  .auth-status { font-family: var(--font); }
+  .nood-optie { background: var(--bg-raised); border-radius: var(--radius-md); }
+  .nood-optie.gekozen { border-left-color: var(--accent); }
+  .nood-keuze-titel, .nood-optie-dag, .nood-optie-naam, .nood-optie-target { font-family: var(--font); }
+  .nood-keuze-titel { font-size: 15px; font-weight: 600; color: var(--text); }
+  .instelling-rij { background: var(--bg-raised); border: 1px solid var(--border); }
+  .empty-progress { color: var(--text-dim); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+
+  /* ============================================================
+     DASHBOARD (home)
+     ============================================================ */
+  .dash { display: flex; flex-direction: column; gap: 16px; }
+  .hero { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
+  .hero-label { margin: 0 0 6px; font-size: 13px; color: var(--accent); font-weight: 600; }
+  .hero-titel { margin: 0; font-size: 28px; line-height: 1.15; font-weight: 700; letter-spacing: -0.02em; }
+  .hero-meta { margin: 8px 0 0; color: var(--text-dim); font-size: 14px; }
+  .hero-acties { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+  .hero-week { display: flex; align-items: center; gap: 12px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--text-dim); font-size: 14px; }
+  .week-pips { display: flex; gap: 6px; }
+  .pip { width: 28px; height: 8px; border-radius: 4px; background: var(--bg-raised-2); }
+  .pip.aan { background: var(--green); }
+  .dash-kolommen { display: flex; flex-direction: column; gap: 16px; }
+  .dash-kolom { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .dash-blok { background: var(--bg-raised); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; }
+  .dash-blok h3 { margin: 0 0 12px; font-size: 15px; font-weight: 600; }
+  .laatste-naam { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+  .laatste-wanneer { margin: 2px 0 12px; color: var(--text-dim); font-size: 14px; }
+  .laatste-energie { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text-dim); }
+  .energie-punten { display: inline-flex; gap: 4px; }
+  .energie-punten i { width: 10px; height: 10px; border-radius: 50%; background: var(--bg-raised-2); }
+  .energie-punten i.aan { background: var(--accent); }
+  .aandacht-rij { display: block; width: 100%; text-align: left; font: inherit; color: var(--text); background: var(--warn-soft); border: 1px solid transparent; border-left: 3px solid var(--warn); border-radius: var(--radius-sm); padding: 12px 14px; margin-top: 8px; cursor: pointer; min-height: 44px; }
+  .aandacht-rij:first-of-type { margin-top: 0; }
+  .aandacht-rij.ok { background: var(--green-soft); border-left-color: var(--green); }
+  .aandacht-tekst { display: block; font-weight: 600; font-size: 15px; }
+  .aandacht-sub { display: block; color: var(--text-dim); font-size: 13px; margin-top: 2px; }
+  .cons-staven { position: relative; display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; height: 112px; margin-top: 12px; }
+  .cons-staven::before { content: ""; position: absolute; left: 0; right: 0; bottom: calc(18px + (100% - 18px) * var(--doel, 0) / 100); border-top: 1px dashed var(--border-strong); }
+  .cons-kolom { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+  .cons-staaf-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; }
+  .cons-staaf { width: 100%; min-height: 3px; border-radius: 4px 4px 0 0; background: var(--bg-raised-2); border: 1px solid var(--border-strong); }
+  .cons-staaf.doel { background: var(--green); border-color: var(--green); }
+  .cons-kolom.huidig .cons-staaf:not(.doel) { background: var(--accent); border-color: var(--accent); }
+  .cons-getal { font-size: 12px; color: var(--text-dim); height: 14px; }
+  .skill-lijst { display: flex; flex-direction: column; gap: 10px; }
+  .skill-rij { display: flex; flex-direction: column; gap: 6px; width: 100%; text-align: left; font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 14px; cursor: pointer; min-height: 44px; }
+  .skill-rij:hover { border-color: var(--border-strong); }
+  .skill-kop { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .skill-naam { font-size: 13px; color: var(--text-dim); font-weight: 600; }
+  .skill-stand { font-size: 13px; color: var(--text-dim); }
+  .skill-niveau { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+  .skill-volgende { font-size: 13px; color: var(--text-dim); }
+  .ladder { display: flex; gap: 4px; }
+  .ladder .sport { flex: 1; height: 6px; border-radius: 3px; background: var(--bg-raised-2); }
+  .ladder .sport.klaar { background: var(--green); }
+  .ladder .sport.nu { background: var(--accent); }
+  @media (min-width: 700px) {
+    .hero { padding: 28px; }
+    .hero-titel { font-size: 36px; }
+    .hero-acties { flex-direction: row; }
+    .hero-acties .btn { flex: 0 0 auto; min-width: 200px; }
+    .dash-kolommen { display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
+  }
+
+  /* Progressie-overzicht: groepen */
+  .prog-overzicht { display: flex; flex-direction: column; gap: 8px; }
+  .prog-groep-kop { display: flex; align-items: baseline; justify-content: space-between; margin: 20px 0 0; font-size: 15px; font-weight: 600; color: var(--text); }
+  .prog-groep:first-child .prog-groep-kop { margin-top: 4px; }
+  .prog-groep-aantal { font-size: 13px; font-weight: 500; color: var(--text-faint); }
+  .prog-groep .progress-tile-grid { margin-top: 6px; gap: 0; }
+  .prog-groep-skill .progress-tile { border-left: 3px solid var(--accent); padding-left: 14px; }
+  @media (min-width: 700px) { .prog-groep .progress-tile-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 24px; } }
+
+  /* Aanraakdoel van broodkruimels: zichtbaar compact, tikvlak ≥ 44px hoog */
+  header.top .crumb button { position: relative; }
+  header.top .crumb button::after { content: ""; position: absolute; left: -6px; right: -6px; top: 50%; height: 44px; transform: translateY(-50%); }
 </style>
 </head>
 <body>
 
 <header class="top">
-  <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Wissel tussen licht en donker thema">
-    <span class="theme-icon-light">☀</span><span class="theme-icon-dark">☾</span>
-  </button>
-  <div class="crumb" id="crumb"></div>
-  <h1 id="pageTitle">Jibbe's Calisthenics Log</h1>
-  <div class="sub" id="pageSub">Trainingsschema, logging en progressie</div>
+  <div class="top-tekst">
+    <div class="crumb" id="crumb"></div>
+    <h1 id="pageTitle">Calisthenics Log</h1>
+    <div class="sub" id="pageSub"></div>
+  </div>
+  <div class="top-acties">
+    <button class="icoon-knop" id="instellingenBtn" onclick="go('instellingen')" aria-label="Instellingen" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
+    <button class="icoon-knop theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" aria-label="Wissel tussen licht en donker thema">
+      <span class="theme-icon-light"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg></span><span class="theme-icon-dark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></span>
+    </button>
+  </div>
 </header>
 
 <div class="wrap" id="app"></div>
+
+<nav class="nav" id="nav" aria-label="Hoofdnavigatie"></nav>
 
 <div id="toast"></div>
 
@@ -6977,9 +7399,49 @@ function renderMaandHtml(r) {
 
 
 // ============================================================
+// APP-SHELL — hoofdnavigatie (onderbalk op mobiel, zijbalk op desktop)
+// Puur weergave: de routes en go() zijn ongewijzigd.
+// ============================================================
+const SVG_ATTR = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+const ICONEN = {
+  home: `<svg ${SVG_ATTR}><path d="M3.5 11 12 4l8.5 7M5.5 9.5V20h5v-6h3v6h5V9.5"/></svg>`,
+  train: `<svg ${SVG_ATTR}><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></svg>`,
+  trend: `<svg ${SVG_ATTR}><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>`,
+  week: `<svg ${SVG_ATTR}><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>`,
+  maand: `<svg ${SVG_ATTR}><path d="M5 20v-6M12 20V5M19 20v-10"/></svg>`
+};
+const NAV_ITEMS = [
+  { label: 'Home', icoon: 'home', hash: 'home', routes: ['home'] },
+  { label: 'Trainen', icoon: 'train', hash: 'trainen', routes: ['trainen', 'loggen'] },
+  { label: 'Progressie', icoon: 'trend', hash: 'progressie', routes: ['progressie'] },
+  { label: 'Week', icoon: 'week', hash: 'week', routes: ['week'] },
+  { label: 'Maand', icoon: 'maand', hash: 'maand', routes: ['maand'] }
+];
+const BREDE_ROUTES = ['home', 'progressie', 'week', 'maand'];
+
+function werkShellBij() {
+  const hoofd = (window.location.hash.slice(1) || 'home').split('/')[0];
+  const body = document.body;
+  body.dataset.route = hoofd;
+  body.dataset.nav = (ingelogd && hoofd !== 'loggen') ? 'aan' : 'uit';
+  body.dataset.breed = BREDE_ROUTES.includes(hoofd) ? 'ruim' : 'smal';
+  const gear = document.getElementById('instellingenBtn');
+  if (gear) gear.hidden = !ingelogd;
+  const nav = document.getElementById('nav');
+  if (!nav) return;
+  nav.innerHTML = `
+    <div class="nav-merk"><img src="${APP_ICOON_SRC}" alt=""><span>Calisthenics Log</span></div>
+    ${NAV_ITEMS.map(i => `
+      <button class="nav-item" onclick="go('${i.hash}')" ${i.routes.includes(hoofd) ? 'aria-current="page"' : ''}>
+        ${ICONEN[i.icoon]}<span>${i.label}</span>
+      </button>`).join('')}`;
+}
+
+// ============================================================
 // ROUTING
 // ============================================================
 function route() {
+  werkShellBij();
   // Niet ingelogd? Dan zie je alleen het loginscherm — ongeacht welke hash er in de
   // URL staat. Zodra je bent ingelogd, wordt de daadwerkelijk bedoelde pagina getoond
   // (zie doLogin, die na een geslaagde login route() opnieuw aanroept).
@@ -7114,43 +7576,193 @@ window.addEventListener('beforeunload', (e) => {
 // ============================================================
 // HOME
 // ============================================================
+// ============================================================
+// HOME — dashboard: wat staat er vandaag op de planning, hoe gaat het en
+// waar sta ik richting mijn skills. Alleen lezen en weergeven; de berekeningen
+// komen uit ProgressieAnalyse/ProgressieEngine en de bestaande laadWeekData().
+// ============================================================
+const SKILL_OVERZICHT = [
+  { naam: 'Planche', id: 'advanced_tuck_planche' },
+  { naam: 'Front lever', id: 'advanced_tuck_front_lever' },
+  { naam: 'Handstand', id: 'chest_to_wall_handstand' }
+];
+let dashboardLaatsteRender = 0;
+
+function dagdeelGroet(d) {
+  const u = d.getHours();
+  return u < 6 ? 'Goedenacht' : u < 12 ? 'Goedemorgen' : u < 18 ? 'Goedemiddag' : 'Goedenavond';
+}
+
+function relatieveDag(ms, nu) {
+  const dagStart = t => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
+  const n = Math.round((dagStart(nu) - dagStart(ms)) / DAG_MS_APP);
+  if (n <= 0) return 'vandaag';
+  if (n === 1) return 'gisteren';
+  if (n < 14) return `${n} dagen geleden`;
+  return korteDatum(ms);
+}
+
+/** Volgende dag in de vaste cyclus (A → B → C → A), op basis van de laatste echte (niet-nood) training. */
+function bepaalVolgendeDag(trainingen) {
+  const cyclus = SCHEMA.dagen.filter(d => !d.isNoodtraining);
+  const laatste = (trainingen || []).filter(t => t && cyclus.some(d => d.id === t.dagId)).sort((a, b) => b.at - a.at)[0];
+  if (!laatste) return { dag: cyclus[0], laatste: null };
+  const i = cyclus.findIndex(d => d.id === laatste.dagId);
+  return { dag: cyclus[(i + 1) % cyclus.length], laatste };
+}
+
+/** Positie van een oefening op zijn ladder: index 0 = startniveau, daarna de ladderniveaus uit program.json. */
+function ladderPositie(cfg, state) {
+  const H = window.ProgressieHistorie;
+  const ladder = (cfg && cfg.ladder) || [];
+  const huidigId = state && state.currentLevelId !== undefined ? state.currentLevelId : null;
+  let idx = huidigId === null ? 0 : ladder.findIndex(l => l.id === huidigId) + 1;
+  if (idx < 0) idx = 0;
+  return {
+    idx, n: ladder.length + 1,
+    label: H ? H.niveauLabel(cfg, huidigId) : String(huidigId || 'startniveau'),
+    volgende: idx < ladder.length ? (ladder[idx].label || ladder[idx].naam || ladder[idx].id) : null
+  };
+}
+
+/** De ladder als reeks sporten: afgerond (groen), huidig (accent), nog te gaan (leeg). */
+function renderLadderBalk(pos) {
+  const sporten = Array.from({ length: pos.n }, (_, i) => `<span class="sport ${i < pos.idx ? 'klaar' : i === pos.idx ? 'nu' : ''}"></span>`).join('');
+  return `<div class="ladder" role="img" aria-label="Niveau ${pos.idx + 1} van ${pos.n}">${sporten}</div>`;
+}
+
+function renderSkillRij(naam, cfg, state) {
+  if (!cfg) return '';
+  const pos = ladderPositie(cfg, state);
+  return `
+    <button class="skill-rij" onclick="go('progressie/${encodeURIComponent(cfg.name)}')">
+      <span class="skill-kop"><span class="skill-naam">${naam}</span><span class="skill-stand tabnum">${pos.idx + 1}/${pos.n}</span></span>
+      <span class="skill-niveau">${pos.label}</span>
+      ${renderLadderBalk(pos)}
+      <span class="skill-volgende">${pos.volgende ? `Volgende stap: ${pos.volgende}` : 'Hoogste niveau bereikt'}</span>
+    </button>`;
+}
+
+function renderConsistentieStaven(trainingen, nu, doel) {
+  const A = window.ProgressieAnalyse;
+  const weken = [];
+  for (let k = 7; k >= 0; k--) {
+    const g = A.weekGrenzen(nu, -k);
+    weken.push({ start: g.start, aantal: trainingen.filter(t => t.at >= g.start && t.at < g.eind).length, huidig: k === 0 });
+  }
+  const max = Math.max(doel, ...weken.map(w => w.aantal));
+  const gem = weken.slice(0, 7).reduce((som, w) => som + w.aantal, 0) / 7;
+  const staven = weken.map(w => `
+    <div class="cons-kolom ${w.huidig ? 'huidig' : ''}" title="Week van ${korteDatum(w.start)}: ${w.aantal} training${w.aantal === 1 ? '' : 'en'}">
+      <div class="cons-staaf-wrap"><div class="cons-staaf ${w.aantal >= doel ? 'doel' : ''}" style="height:${Math.round((w.aantal / max) * 100)}%"></div></div>
+      <span class="cons-getal tabnum">${w.aantal}</span>
+    </div>`).join('');
+  return { html: `<div class="cons-staven" style="--doel:${Math.round((doel / max) * 100)}%">${staven}</div>`, gemiddelde: Math.round(gem * 10) / 10 };
+}
+
+function renderEnergiePunten(energie) {
+  if (energie === null || energie === undefined) return '<span class="dim">Geen energie ingevuld</span>';
+  return `<span class="energie-punten" aria-label="Energie ${energie} van 5">${[1, 2, 3, 4, 5].map(i => `<i class="${i <= energie ? 'aan' : ''}"></i>`).join('')}</span><span class="tabnum">${energie} van 5</span>`;
+}
+
 function renderHome() {
-  setHeader("Jibbe's Calisthenics Log", "Trainingsschema, logging en progressie", null);
+  const nu = new Date();
+  const dagTekst = nu.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' });
+  setHeader(dagdeelGroet(nu), dagTekst.charAt(0).toUpperCase() + dagTekst.slice(1), null);
+  const doelPerWeek = SCHEMA.dagen.filter(d => !d.isNoodtraining).length;
 
-  app.innerHTML = `
-    <div class="home-icoon-wrap">
-      <img src="${APP_ICOON_SRC}" alt="" class="home-icoon">
-    </div>
-    <div class="menu-grid">
-      <button class="menu-card" onclick="go('trainen')">
-        <span class="label">Trainen</span>
-        <span class="desc">Schema bekijken en trainingen loggen</span>
-        <span class="arrow">→</span>
-      </button>
-      <button class="menu-card" onclick="go('progressie')">
-        <span class="label">Progressie</span>
-        <span class="desc">Grafieken per oefening, in één oogopslag</span>
-        <span class="arrow">→</span>
-      </button>
-      <button class="menu-card" onclick="go('week')">
-        <span class="label">Week</span>
-        <span class="desc">Volume per spiergroep, stagnatie, energie en deload</span>
-        <span class="arrow">→</span>
-      </button>
-      <button class="menu-card" onclick="go('maand')">
-        <span class="label">Maand</span>
-        <span class="desc">Rapport: sessies, records, niveaus, volume en aandachtspunten</span>
-        <span class="arrow">→</span>
-      </button>
-      <button class="menu-card" onclick="go('instellingen')">
-        <span class="label">Instellingen</span>
-        <span class="desc">Beoordelen per set of per oefening</span>
-        <span class="arrow">→</span>
-      </button>
-    </div>
+  const skelet = (dag, ctx) => {
+    const wk = ctx ? ctx.weekTrainingen : null;
+    const dagLabel = `Dag ${dag.id.toUpperCase()}`;
+    const aantalOef = [...(dag.skill ? dag.skill.oefeningen : []), ...(dag.strength || []), ...(dag.hypertrophy || []), ...(dag.legs || [])].length;
+    return `
+      ${renderHerstelBanner()}
+      <section class="hero">
+        <p class="hero-label">Volgende training</p>
+        <h2 class="hero-titel">${dag.naam}</h2>
+        <p class="hero-meta">${[dagLabel, dag.duur, `${aantalOef} oefeningen`].filter(Boolean).join(' · ')}</p>
+        <div class="hero-acties">
+          <button class="btn primary groot" onclick="go('loggen/${dag.id}')">Start training</button>
+          <button class="btn ghost" onclick="go('trainen/${dag.id}')">Schema bekijken</button>
+        </div>
+        ${wk === null ? '' : `
+        <div class="hero-week">
+          <div class="week-pips" aria-label="${wk} van ${doelPerWeek} trainingen deze week">${Array.from({ length: doelPerWeek }, (_, i) => `<span class="pip ${i < wk ? 'aan' : ''}"></span>`).join('')}</div>
+          <span class="tabnum">${wk} van ${doelPerWeek} trainingen deze week</span>
+        </div>`}
+      </section>`;
+  };
 
-    ${renderChangelogBlock()}
-  `;
+  const eerste = skelet(SCHEMA.dagen.find(d => !d.isNoodtraining) || SCHEMA.dagen[0], null);
+  app.innerHTML = `<div class="dash">${eerste}<p class="week-sub" id="dashLaden">Gegevens laden…</p></div>`;
+  const mijnRender = ++dashboardLaatsteRender;
+
+  const A = window.ProgressieAnalyse, E = window.ProgressieEngine;
+  if (!A || !E || !window.firebaseProgressie || !window.firebaseDb) { const el = document.getElementById('dashLaden'); if (el) el.remove(); return; }
+  const nuMs = Date.now();
+  laadWeekData(nuMs, A.weekGrenzen(nuMs, 0)).then(data => {
+    if (mijnRender !== dashboardLaatsteRender || (window.location.hash.slice(1) || 'home').split('/')[0] !== 'home') return;
+    const res = A.evaluateWeek({
+      config: window.PROGRAM_CONFIG, sets: data.sets, logs: data.logs, trainingen: data.trainingen, decisions: data.decisions,
+      exerciseStates: data.exerciseStates, deload: data.deload, eersteTrainingOp: data.eersteTrainingOp,
+      bepaalStagnatie: E.bepaalStagnatie, ruleEffect: E.RULE_EFFECT, nu: nuMs, weekOffset: 0
+    });
+    const { dag, laatste } = bepaalVolgendeDag(data.trainingen);
+    const gr = A.weekGrenzen(nuMs, 0);
+    const weekTrainingen = Math.max(data.trainingen.filter(t => t.at >= gr.start && t.at < gr.eind).length, res.trainingen || 0);
+    const cons = renderConsistentieStaven(data.trainingen, nuMs, doelPerWeek);
+    const laatsteSorted = data.trainingen.slice().sort((a, b) => b.at - a.at)[0];
+    const laatsteKaart = laatsteSorted ? `
+      <section class="dash-blok">
+        <h3>Laatste training</h3>
+        <p class="laatste-naam">${laatsteSorted.dagNaam || (SCHEMA.dagen.find(d => d.id === laatsteSorted.dagId) || {}).naam || 'Training'}</p>
+        <p class="laatste-wanneer">${relatieveDag(laatsteSorted.at, nuMs)}</p>
+        <div class="laatste-energie">${renderEnergiePunten(laatsteSorted.energie)}</div>
+      </section>` : `
+      <section class="dash-blok">
+        <h3>Laatste training</h3>
+        <p class="week-sub">Nog geen training opgeslagen. Je eerste training verschijnt hier met je energiescore.</p>
+      </section>`;
+    const aandacht = [];
+    if (res.deload && res.deload.actief) aandacht.push({ tekst: 'Deload actief', sub: 'Halve werksets, geen progressie.', soort: 'ok' });
+    else if (res.deload && res.deload.voorstel) aandacht.push({ tekst: 'Deload voorgesteld', sub: 'Bekijk de criteria op de weekpagina.', soort: 'warn' });
+    if (res.stagnatie && res.stagnatie.length) aandacht.push({ tekst: `Stagnatie bij ${res.stagnatie.length} oefening${res.stagnatie.length === 1 ? '' : 'en'}`, sub: 'Bekijk welke op de weekpagina.', soort: 'warn' });
+    const aandachtHtml = aandacht.length ? `
+      <section class="dash-blok">
+        <h3>Let op</h3>
+        ${aandacht.map(a => `<button class="aandacht-rij ${a.soort}" onclick="go('week')"><span class="aandacht-tekst">${a.tekst}</span><span class="aandacht-sub">${a.sub}</span></button>`).join('')}
+      </section>` : '';
+    const skills = SKILL_OVERZICHT.map(sk => {
+      const cfg = window.PROGRAM_CONFIG.exercises.find(e => e.id === sk.id);
+      return renderSkillRij(sk.naam, cfg, data.exerciseStates[sk.id] || null);
+    }).join('');
+    app.innerHTML = `
+      <div class="dash">
+        ${skelet(dag, { weekTrainingen })}
+        <div class="dash-kolommen">
+          <div class="dash-kolom">
+            ${aandachtHtml}
+            ${laatsteKaart}
+            <section class="dash-blok">
+              <h3>Trainingen per week</h3>
+              <p class="week-sub">Gemiddeld ${String(cons.gemiddelde).replace('.', ',')} per week over de afgelopen 7 weken. Doel: ${doelPerWeek}.</p>
+              ${cons.html}
+            </section>
+          </div>
+          <div class="dash-kolom">
+            <section class="dash-blok">
+              <h3>Skills</h3>
+              <div class="skill-lijst">${skills}</div>
+            </section>
+          </div>
+        </div>
+        ${renderChangelogBlock()}
+      </div>`;
+  }).catch(e => {
+    console.error('Dashboard laden mislukt', e);
+    const el = document.getElementById('dashLaden');
+    if (el) el.textContent = 'Gegevens laden mislukt. Je kunt wel gewoon trainen; probeer later opnieuw.';
+  });
 }
 
 function renderChangelogBlock() {
@@ -10029,6 +10641,42 @@ function vertaalAuthFout(code) {
 // ============================================================
 // PROGRESSIE — oefening-picker + grafiek + statistieken
 // ============================================================
+
+/** Oefeningen voor het progressie-overzicht, gegroepeerd zoals in het schema: skills apart van kracht, hypertrofie en benen. */
+function progressieGroepen() {
+  const gezien = new Set();
+  const groepen = [
+    { titel: 'Skills', sleutel: 'skill', namen: [] },
+    { titel: 'Kracht', sleutel: 'strength', namen: [] },
+    { titel: 'Hypertrofie', sleutel: 'hypertrophy', namen: [] },
+    { titel: 'Benen', sleutel: 'legs', namen: [] }
+  ];
+  SCHEMA.dagen.forEach(dag => {
+    if (dag.skill && dag.skill.oefeningen) dag.skill.oefeningen.forEach(o => { if (ALLE_OEFENINGEN.includes(o.naam) && !gezien.has(o.naam)) { gezien.add(o.naam); groepen[0].namen.push(o.naam); } });
+    ['strength', 'hypertrophy', 'legs'].forEach((k, i) => (dag[k] || []).forEach(o => { if (ALLE_OEFENINGEN.includes(o.naam) && !gezien.has(o.naam)) { gezien.add(o.naam); groepen[i + 1].namen.push(o.naam); } }));
+  });
+  const rest = ALLE_OEFENINGEN.filter(n => !gezien.has(n));
+  if (rest.length) groepen.push({ titel: 'Overig', sleutel: 'overig', namen: rest });
+  return groepen.filter(g => g.namen.length);
+}
+
+function renderProgressieGroepen(laatsteWaarden) {
+  return progressieGroepen().map(g => `
+    <section class="prog-groep prog-groep-${g.sleutel}">
+      <h3 class="prog-groep-kop">${g.titel}<span class="prog-groep-aantal tabnum">${g.namen.length}</span></h3>
+      <div class="progress-tile-grid">${g.namen.map(naam => {
+        const laatste = laatsteWaarden ? laatsteWaarden[naam] : null;
+        const sub = !laatste ? 'Nog geen logs' : laatste.gewicht > 0 ? `${laatste.gewicht}kg · laatste sessie` : 'Gelogd · bekijk verloop';
+        return `
+        <button class="progress-tile" onclick="go('progressie/${encodeURIComponent(naam)}')">
+          <div class="pt-naam">${naam}</div>
+          <div class="pt-sub">${sub}</div>
+          <span class="pt-arrow">→</span>
+        </button>`;
+      }).join('')}</div>
+    </section>`).join('');
+}
+
 function renderProgressieOverzicht() {
   setHeader("Progressie", "Tik een oefening voor de grafiek en details", [
     { label: 'Home', action: () => go('home') },
@@ -10040,24 +10688,13 @@ function renderProgressieOverzicht() {
   haalLaatsteWaardePerOefeningOp().then(({ waarden: laatsteWaarden, debugInfo }) => {
     if (window.location.hash !== '#progressie') return; // ondertussen weggenavigeerd
 
-    const tegels = ALLE_OEFENINGEN.map(naam => {
-      const laatste = laatsteWaarden[naam];
-      return `
-        <button class="progress-tile" onclick="go('progressie/${encodeURIComponent(naam)}')">
-          <div class="pt-naam">${naam}</div>
-          <div class="pt-sub">${laatste ? `${laatste.gewicht}kg · laatste sessie` : 'Nog geen logs'}</div>
-          <span class="pt-arrow">→</span>
-        </button>
-      `;
-    }).join('');
-
     // Diagnostische regel: alleen zichtbaar als er niets gevonden is, zodat je in de
     // app zelf (ook op mobiel, zonder devtools) kunt zien wat er precies gebeurde.
     const diagnoseHtml = Object.keys(laatsteWaarden).length === 0
       ? `<div class="chart-sub" style="margin-bottom: 12px; opacity: 0.7;">${debugInfo}</div>`
       : '';
 
-    app.innerHTML = `${diagnoseHtml}<div class="progress-tile-grid">${tegels}</div>`;
+    app.innerHTML = `${diagnoseHtml}<div class="prog-overzicht">${renderProgressieGroepen(laatsteWaarden)}</div>`;
   }).catch((fout) => {
     console.error('Progressie-overzicht laden mislukt:', fout);
     if (window.location.hash !== '#progressie') return;
@@ -10066,17 +10703,10 @@ function renderProgressieOverzicht() {
     const foutHtml = `
       <div class="chart-card" style="margin-bottom: 16px;">
         <div class="empty-progress-title" style="color: var(--danger);">Kon logs niet laden</div>
-        <div class="empty-progress-sub" style="font-family: 'SF Mono', monospace; font-size: 11px; word-break: break-word; margin-top: 8px;">${(fout && fout.message) ? fout.message : String(fout)}</div>
+        <div class="empty-progress-sub" style="font-family: 'ui-sans-serif, system-ui, -apple-system, sans-serif', monospace; font-size: 11px; word-break: break-word; margin-top: 8px;">${(fout && fout.message) ? fout.message : String(fout)}</div>
       </div>
     `;
-    const tegels = ALLE_OEFENINGEN.map(naam => `
-      <button class="progress-tile" onclick="go('progressie/${encodeURIComponent(naam)}')">
-        <div class="pt-naam">${naam}</div>
-        <div class="pt-sub">Nog geen logs</div>
-        <span class="pt-arrow">→</span>
-      </button>
-    `).join('');
-    app.innerHTML = `${foutHtml}<div class="progress-tile-grid">${tegels}</div>`;
+    app.innerHTML = `${foutHtml}<div class="prog-overzicht">${renderProgressieGroepen(null)}</div>`;
   });
 }
 
@@ -10443,7 +11073,8 @@ function tekenChart(oefeningNaam) {
 
   const rootStyles = getComputedStyle(document.documentElement);
   const clay = rootStyles.getPropertyValue('--clay-bright').trim();
-  const moss = rootStyles.getPropertyValue('--moss-bright').trim();
+  // Reps/seconden als neutrale staven; het accent is gereserveerd voor de lijn (gewicht)
+  const moss = rootStyles.getPropertyValue('--text-faint').trim();
   const textDim = rootStyles.getPropertyValue('--text-dim').trim();
   const border = rootStyles.getPropertyValue('--border').trim();
 
@@ -10454,7 +11085,7 @@ function tekenChart(oefeningNaam) {
 
   const datasets = [];
   const scales = {
-    x: { ticks: { color: textDim, font: { family: 'SF Mono', size: 10 } }, grid: { color: border, drawTicks: false } }
+    x: { ticks: { color: textDim, font: { family: 'ui-sans-serif, system-ui, -apple-system, sans-serif', size: 10 } }, grid: { color: border, drawTicks: false } }
   };
 
   if (progressieWeergave.toonSets) {
@@ -10469,9 +11100,9 @@ function tekenChart(oefeningNaam) {
     });
     scales.ySets = {
       position: 'left',
-      ticks: { color: moss, font: { family: 'SF Mono', size: 10 } },
+      ticks: { color: moss, font: { family: 'ui-sans-serif, system-ui, -apple-system, sans-serif', size: 10 } },
       grid: { color: border },
-      title: { display: true, text: eenheidLabel, color: moss, font: { family: 'SF Mono', size: 10 } }
+      title: { display: true, text: eenheidLabel, color: moss, font: { family: 'ui-sans-serif, system-ui, -apple-system, sans-serif', size: 10 } }
     };
   }
 
@@ -10492,9 +11123,9 @@ function tekenChart(oefeningNaam) {
     });
     scales.yGewicht = {
       position: 'right',
-      ticks: { color: clay, font: { family: 'SF Mono', size: 10 } },
+      ticks: { color: clay, font: { family: 'ui-sans-serif, system-ui, -apple-system, sans-serif', size: 10 } },
       grid: { drawOnChartArea: !progressieWeergave.toonSets, color: border },
-      title: { display: true, text: 'kg', color: clay, font: { family: 'SF Mono', size: 10 } }
+      title: { display: true, text: 'kg', color: clay, font: { family: 'ui-sans-serif, system-ui, -apple-system, sans-serif', size: 10 } }
     };
   }
 
@@ -10506,7 +11137,7 @@ function tekenChart(oefeningNaam) {
       plugins: {
         legend: {
           display: datasets.length > 1,
-          labels: { color: textDim, font: { family: 'SF Mono', size: 11 }, boxWidth: 12 }
+          labels: { color: textDim, font: { family: 'ui-sans-serif, system-ui, -apple-system, sans-serif', size: 11 }, boxWidth: 12 }
         }
       },
       scales
@@ -10574,17 +11205,15 @@ document.addEventListener('visibilitychange', () => {
 // Wordt onthouden in localStorage zodat de keuze blijft staan bij een volgend bezoek.
 // ============================================================
 function pasThemaToe(thema) {
-  if (thema === 'light' || thema === 'dark') {
-    document.documentElement.setAttribute('data-theme', thema);
-  } else {
-    document.documentElement.removeAttribute('data-theme'); // volg systeeminstelling
-  }
+  // Donker is de standaard; alleen een bewuste keuze voor licht wijkt daarvan af.
+  const effectief = thema === 'light' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', effectief);
+  const meta = document.getElementById('themeColorMeta');
+  if (meta) meta.setAttribute('content', effectief === 'light' ? '#F2F3F6' : '#14161A');
 }
 
 function toggleTheme() {
-  const huidig = document.documentElement.getAttribute('data-theme');
-  const stelselDonker = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const huidigEffectief = huidig || (stelselDonker ? 'dark' : 'light');
+  const huidigEffectief = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
   const nieuw = huidigEffectief === 'dark' ? 'light' : 'dark';
   pasThemaToe(nieuw);
   try { localStorage.setItem('thema', nieuw); } catch (e) { /* localStorage niet beschikbaar, geen probleem */ }
@@ -10598,9 +11227,8 @@ function toggleTheme() {
 // Opgeslagen voorkeur meteen toepassen, vóór de eerste render — voorkomt een
 // zichtbare flits van het verkeerde thema bij het laden van de pagina.
 try {
-  const opgeslagenThema = localStorage.getItem('thema');
-  if (opgeslagenThema) pasThemaToe(opgeslagenThema);
-} catch (e) { /* localStorage niet beschikbaar, systeeminstelling blijft gelden */ }
+  pasThemaToe(localStorage.getItem('thema'));
+} catch (e) { pasThemaToe(null); /* localStorage niet beschikbaar: donker */ }
 
 // ============================================================
 // INIT
